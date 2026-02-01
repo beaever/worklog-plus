@@ -4,8 +4,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "skipLibCheck": true
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "*.ts", "*.tsx"],
   "exclude": ["node_modules"]
 }
