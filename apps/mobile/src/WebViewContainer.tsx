@@ -3,7 +3,9 @@ import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { getWebViewConfig } from './utils/webview-config';
 
-const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL ?? 'http://localhost:3000';
+// iOS 시뮬레이터에서 localhost 대신 Mac의 IP 주소 사용
+// 실제 배포 시에는 환경변수로 설정
+const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL ?? 'http://172.30.1.36:3000';
 
 export function WebViewContainer() {
   const webViewRef = useRef<WebView>(null);
