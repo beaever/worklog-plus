@@ -1,5 +1,6 @@
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
 
 export default function WorklogsLayout({
   children,
@@ -12,6 +13,7 @@ export default function WorklogsLayout({
       <div className='flex flex-1 flex-col'>
         <Header />
         <main className='flex-1 p-6'>{children}</main>
+        <Footer />
       </div>
     </div>
   );
