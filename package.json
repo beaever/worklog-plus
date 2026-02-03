@@ -9,6 +9,7 @@
     "dev:mobile": "turbo dev --filter=@worklog/mobile",
     "dev:mobile:ios": "pnpm --filter @worklog/mobile dev:ios",
     "dev:mobile:android": "pnpm --filter @worklog/mobile dev:android",
+    "storybook": "pnpm --filter @worklog/storybook dev",
     "build": "turbo build",
     "build:web": "turbo build --filter=@worklog/web",
     "typecheck": "turbo typecheck",
