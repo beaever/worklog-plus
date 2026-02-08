@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button, Input } from '@worklog/ui';
-import { useUserStore } from '@worklog/store';
-import type { User } from '@worklog/types';
+import { Button, Input } from '@worklog-plus/ui';
+import { useUserStore } from '@worklog-plus/store';
+import type { User } from '@worklog-plus/types';
 import { generateUUID } from '@/lib/utils';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

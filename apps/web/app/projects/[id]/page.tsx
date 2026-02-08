@@ -2,16 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Button, Badge } from '@worklog/ui';
+import { Button, Badge } from '@worklog-plus/ui';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
-import type { ProjectStatus, UpdateProjectInput } from '@worklog/types';
+import type { ProjectStatus, UpdateProjectInput } from '@worklog-plus/types';
 import { ProjectKPICards } from '@/components/project/project-kpi-cards';
 import { ProjectProgress } from '@/components/project/project-progress';
 import { ProjectTimeline } from '@/components/project/project-timeline';
 import { ProjectActivityLog } from '@/components/project/project-activity-log';
 import { ProjectFormModal } from '@/components/project/project-form-modal';
 import { DeleteProjectDialog } from '@/components/project/delete-project-dialog';
-import { useProjectStore } from '@worklog/store';
+import { useProjectStore } from '@worklog-plus/store';
 import { useProjectDetail } from '@/hooks/use-project-detail';
 
 const statusConfig: Record<

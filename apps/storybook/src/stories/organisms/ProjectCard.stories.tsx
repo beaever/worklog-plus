@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { ProjectCard } from '@worklog/components';
-import type { ProjectSummary } from '@worklog/types';
+import { ProjectCard } from '@worklog-plus/components';
+import type { ProjectSummary } from '@worklog-plus/types';
 
 const meta: Meta<typeof ProjectCard> = {
   title: 'Organisms/ProjectCard',
@@ -83,7 +83,10 @@ export const HighProgress: Story = {
 
 export const AllStatuses: Story = {
   render: () => (
-    <div className="grid gap-4 w-[900px]" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+    <div
+      className='grid gap-4 w-[900px]'
+      style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}
+    >
       <ProjectCard
         project={{
           id: '1',

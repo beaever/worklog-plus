@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cn, Button } from '@worklog/ui';
+import { cn, Button } from '@worklog-plus/ui';
 import {
   X,
   LayoutDashboard,
@@ -14,7 +14,7 @@ import {
   Activity,
   LogOut,
 } from 'lucide-react';
-import { useUserStore } from '@worklog/store';
+import { useUserStore } from '@worklog-plus/store';
 
 const navigation = [
   { name: '대시보드', href: '/dashboard', icon: LayoutDashboard },

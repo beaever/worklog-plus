@@ -3,8 +3,8 @@ import type {
   WorklogCreateInput,
   WorklogUpdateInput,
   PaginatedResponse,
-} from "@worklog/types";
-import { apiClient } from "./client";
+} from '@worklog-plus/types';
+import { apiClient } from './client';
 
 export const worklogsApi = {
   getAll: (projectId?: string, page = 1, limit = 10) => {
@@ -15,13 +15,13 @@ export const worklogsApi = {
     if (projectId) {
       params.projectId = projectId;
     }
-    return apiClient.get<PaginatedResponse<Worklog>>("/worklogs", params);
+    return apiClient.get<PaginatedResponse<Worklog>>('/worklogs', params);
   },
 
   getById: (id: string) => apiClient.get<Worklog>(`/worklogs/${id}`),
 
   create: (data: WorklogCreateInput) =>
-    apiClient.post<Worklog>("/worklogs", data),
+    apiClient.post<Worklog>('/worklogs', data),
 
   update: (data: WorklogUpdateInput) =>
     apiClient.patch<Worklog>(`/worklogs/${data.id}`, data),

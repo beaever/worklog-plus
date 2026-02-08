@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ResponsiveModal, Button } from '@worklog/ui';
+import { ResponsiveModal, Button } from '@worklog-plus/ui';
 import { AlertTriangle } from 'lucide-react';
 
 interface DeleteProjectDialogProps {

@@ -13,9 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
   Badge,
-} from '@worklog/ui';
+} from '@worklog-plus/ui';
 import { Search, User, FolderOpen, Shield, Settings } from 'lucide-react';
-import type { AuditLog, AuditAction } from '@worklog/types';
+import type { AuditLog, AuditAction } from '@worklog-plus/types';
 
 const mockAuditLogs: AuditLog[] = [
   {

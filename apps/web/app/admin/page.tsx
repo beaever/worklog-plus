@@ -7,9 +7,9 @@ import {
   CardTitle,
   CardContent,
   CardDescription,
-} from '@worklog/ui';
+} from '@worklog-plus/ui';
 import { Users, Shield, Settings, FileText, ArrowRight } from 'lucide-react';
-import { useUserStore } from '@worklog/store';
+import { useUserStore } from '@worklog-plus/store';
 
 const adminCards = [
   {

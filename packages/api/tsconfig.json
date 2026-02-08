@@ -1,5 +1,5 @@
 {
-  "extends": "@worklog/config/typescript/library.json",
+  "extends": "@worklog-plus/config/typescript/library.json",
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist"

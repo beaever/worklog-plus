@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Users, Shield, Settings, FileText, ArrowLeft } from 'lucide-react';
-import { cn } from '@worklog/ui';
-import { useUserStore } from '@worklog/store';
-import type { UserRole } from '@worklog/types';
+import { cn } from '@worklog-plus/ui';
+import { useUserStore } from '@worklog-plus/store';
+import type { UserRole } from '@worklog-plus/types';
 
 interface NavItem {
   href: string;
@@ -46,7 +46,7 @@ export function AdminSidebar() {
   const { user } = useUserStore();
 
   const filteredNavigation = navigation.filter((item) =>
-    user?.role ? item.roles.includes(user.role) : false
+    user?.role ? item.roles.includes(user.role) : false,
   );
 
   return (
@@ -67,7 +67,7 @@ export function AdminSidebar() {
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
                 isActive
                   ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
               )}
             >
               <item.icon className='h-4 w-4' />

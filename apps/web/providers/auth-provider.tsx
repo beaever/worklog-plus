@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useUserStore } from '@worklog/store';
+import { useUserStore } from '@worklog-plus/store';
 
 const PUBLIC_PATHS = ['/login', '/register', '/'];
 

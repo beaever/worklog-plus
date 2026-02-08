@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ResponsiveModal, Button } from '@worklog/ui';
+import { ResponsiveModal, Button } from '@worklog-plus/ui';
 import { AlertTriangle } from 'lucide-react';
 
 interface DeleteWorklogDialogProps {
@@ -44,8 +44,8 @@ export function DeleteWorklogDialog({
         </ResponsiveModal.Header>
         <div className='py-4'>
           <p className='text-sm text-muted-foreground'>
-            <strong className='text-foreground'>{worklogTitle}</strong> 업무일지를
-            삭제하시겠습니까?
+            <strong className='text-foreground'>{worklogTitle}</strong>{' '}
+            업무일지를 삭제하시겠습니까?
           </p>
           <p className='mt-2 text-sm text-muted-foreground'>
             이 작업은 되돌릴 수 없습니다.

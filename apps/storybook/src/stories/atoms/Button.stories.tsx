@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Button } from '@worklog/ui';
+import { Button } from '@worklog-plus/ui';
 import { Plus, Edit } from 'lucide-react';
 
 const meta: Meta<typeof Button> = {

@@ -1,3 +1,3 @@
-import nextjsConfig from "@worklog/config/eslint/nextjs.js";
+import nextjsConfig from '@worklog-plus/config/eslint/nextjs.js';
 
 export default [...nextjsConfig];

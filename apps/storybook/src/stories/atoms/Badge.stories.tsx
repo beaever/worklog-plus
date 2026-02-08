@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Badge } from '@worklog/ui';
+import { Badge } from '@worklog-plus/ui';
 
 const meta: Meta<typeof Badge> = {
   title: 'Atoms/Badge',
@@ -49,10 +49,10 @@ export const Outline: Story = {
 
 export const ProjectStatus: Story = {
   render: () => (
-    <div className="flex gap-2">
-      <Badge variant="secondary">예정</Badge>
-      <Badge variant="default">진행중</Badge>
-      <Badge variant="outline">완료</Badge>
+    <div className='flex gap-2'>
+      <Badge variant='secondary'>예정</Badge>
+      <Badge variant='default'>진행중</Badge>
+      <Badge variant='outline'>완료</Badge>
     </div>
   ),
 };

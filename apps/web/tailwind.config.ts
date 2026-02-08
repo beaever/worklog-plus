@@ -1,12 +1,12 @@
-import type { Config } from "tailwindcss";
-import sharedConfig from "@worklog/ui/tailwind.config";
+import type { Config } from 'tailwindcss';
+import sharedConfig from '@worklog-plus/ui/tailwind.config';
 
 const config: Config = {
   ...sharedConfig,
   content: [
-    "./app/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "../../packages/ui/src/**/*.{ts,tsx}",
+    './app/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    '../../packages/ui/src/**/*.{ts,tsx}',
   ],
 };
 

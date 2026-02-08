@@ -1,5 +1,9 @@
-import { create } from "zustand";
-import type { Project, ProjectSummary, ProjectStatus } from "@worklog/types";
+import { create } from 'zustand';
+import type {
+  Project,
+  ProjectSummary,
+  ProjectStatus,
+} from '@worklog-plus/types';
 
 interface ProjectFilters {
   status?: ProjectStatus;
@@ -49,7 +53,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   updateProject: (id, data) =>
     set((state) => ({
       projects: state.projects.map((p) =>
-        p.id === id ? { ...p, ...data } : p
+        p.id === id ? { ...p, ...data } : p,
       ),
       currentProject:
         state.currentProject?.id === id
@@ -60,8 +64,10 @@ export const useProjectStore = create<ProjectState>((set) => ({
   removeProject: (id) =>
     set((state) => ({
       projects: state.projects.filter((p) => p.id !== id),
-      currentProjectId: state.currentProjectId === id ? null : state.currentProjectId,
-      currentProject: state.currentProject?.id === id ? null : state.currentProject,
+      currentProjectId:
+        state.currentProjectId === id ? null : state.currentProjectId,
+      currentProject:
+        state.currentProject?.id === id ? null : state.currentProject,
     })),
 
   setFilters: (filters) => set({ filters }),

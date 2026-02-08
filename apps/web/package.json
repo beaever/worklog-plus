@@ -1,5 +1,5 @@
 {
-  "name": "@worklog/web",
+  "name": "@worklog-plus/web",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -11,11 +11,11 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.8",
-    "@worklog/api": "workspace:*",
-    "@worklog/hooks": "workspace:*",
-    "@worklog/store": "workspace:*",
-    "@worklog/types": "workspace:*",
-    "@worklog/ui": "workspace:*",
+    "@worklog-plus/api": "workspace:*",
+    "@worklog-plus/hooks": "workspace:*",
+    "@worklog-plus/store": "workspace:*",
+    "@worklog-plus/types": "workspace:*",
+    "@worklog-plus/ui": "workspace:*",
     "lucide-react": "^0.469.0",
     "next": "^15.1.3",
     "react": "^19.0.0",
@@ -26,7 +26,7 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
-    "@worklog/config": "workspace:*",
+    "@worklog-plus/config": "workspace:*",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",

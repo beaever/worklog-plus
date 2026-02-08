@@ -15,9 +15,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@worklog/ui';
+} from '@worklog-plus/ui';
 import { Search, Eye, Edit, MoreHorizontal } from 'lucide-react';
-import type { UserListItem, UserRole, UserStatus } from '@worklog/types';
+import type { UserListItem, UserRole, UserStatus } from '@worklog-plus/types';
 
 const mockUsers: UserListItem[] = [
   {

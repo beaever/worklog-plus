@@ -1,5 +1,5 @@
 {
-  "extends": "@worklog/config/typescript/react-native.json",
+  "extends": "@worklog-plus/config/typescript/react-native.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

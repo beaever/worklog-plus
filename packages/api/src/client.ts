@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@worklog/types';
+import type { ApiResponse } from '@worklog-plus/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 

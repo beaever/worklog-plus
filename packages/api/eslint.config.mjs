@@ -1,3 +1,3 @@
-import baseConfig from "@worklog/config/eslint/base.js";
+import baseConfig from '@worklog-plus/config/eslint/base.js';
 
 export default [...baseConfig];

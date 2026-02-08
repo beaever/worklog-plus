@@ -15,9 +15,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@worklog/ui';
+} from '@worklog-plus/ui';
 import { Save } from 'lucide-react';
-import type { SystemSettings } from '@worklog/types';
+import type { SystemSettings } from '@worklog-plus/types';
 
 const mockSettings: SystemSettings = {
   general: {
@@ -52,7 +52,9 @@ export default function SettingsPage() {
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-2xl font-bold'>시스템 설정</h1>
-          <p className='text-muted-foreground'>시스템 전반의 설정을 관리합니다.</p>
+          <p className='text-muted-foreground'>
+            시스템 전반의 설정을 관리합니다.
+          </p>
         </div>
         <Button onClick={handleSave} disabled={isSaving}>
           <Save className='mr-2 h-4 w-4' />
@@ -76,7 +78,10 @@ export default function SettingsPage() {
                   onChange={(e) =>
                     setSettings({
                       ...settings,
-                      general: { ...settings.general, serviceName: e.target.value },
+                      general: {
+                        ...settings.general,
+                        serviceName: e.target.value,
+                      },
                     })
                   }
                 />
@@ -117,8 +122,12 @@ export default function SettingsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value='Asia/Seoul'>Asia/Seoul (KST)</SelectItem>
-                    <SelectItem value='America/New_York'>America/New_York (EST)</SelectItem>
-                    <SelectItem value='Europe/London'>Europe/London (GMT)</SelectItem>
+                    <SelectItem value='America/New_York'>
+                      America/New_York (EST)
+                    </SelectItem>
+                    <SelectItem value='Europe/London'>
+                      Europe/London (GMT)
+                    </SelectItem>
                     <SelectItem value='Asia/Tokyo'>Asia/Tokyo (JST)</SelectItem>
                   </SelectContent>
                 </Select>
@@ -130,7 +139,9 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>프로젝트 규칙</CardTitle>
-            <CardDescription>프로젝트 생성 및 관리 규칙을 설정합니다.</CardDescription>
+            <CardDescription>
+              프로젝트 생성 및 관리 규칙을 설정합니다.
+            </CardDescription>
           </CardHeader>
           <CardContent className='space-y-4'>
             <div className='grid gap-4 sm:grid-cols-2'>
@@ -181,7 +192,9 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>보안 설정</CardTitle>
-            <CardDescription>비밀번호 정책 및 세션 설정을 관리합니다.</CardDescription>
+            <CardDescription>
+              비밀번호 정책 및 세션 설정을 관리합니다.
+            </CardDescription>
           </CardHeader>
           <CardContent className='space-y-4'>
             <div className='grid gap-4 sm:grid-cols-2'>

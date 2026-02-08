@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Badge, Card, CardHeader, CardContent } from '@worklog/ui';
+import { Button, Badge, Card, CardHeader, CardContent } from '@worklog-plus/ui';
 import {
   ArrowLeft,
   Edit,
@@ -11,7 +11,7 @@ import {
   Clock,
   FolderOpen,
 } from 'lucide-react';
-import type { Worklog, WorklogCreateInput } from '@worklog/types';
+import type { Worklog, WorklogCreateInput } from '@worklog-plus/types';
 import { WorklogFormModal } from '@/components/worklog/worklog-form-modal';
 import { DeleteWorklogDialog } from '@/components/worklog/delete-worklog-dialog';
 

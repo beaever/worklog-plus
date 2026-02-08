@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUserStore } from '@worklog/store';
-import type { UserRole } from '@worklog/types';
+import { useUserStore } from '@worklog-plus/store';
+import type { UserRole } from '@worklog-plus/types';
 
 const ADMIN_ROLES: UserRole[] = ['ADMIN', 'SYSTEM_ADMIN'];
 
@@ -12,7 +12,10 @@ interface AdminGuardProps {
   requiredRoles?: UserRole[];
 }
 
-export function AdminGuard({ children, requiredRoles = ADMIN_ROLES }: AdminGuardProps) {
+export function AdminGuard({
+  children,
+  requiredRoles = ADMIN_ROLES,
+}: AdminGuardProps) {
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useUserStore();
 

@@ -55,10 +55,10 @@ pnpm install
 pnpm dev
 
 # Web만 실행
-pnpm --filter @worklog/web dev
+pnpm --filter @worklog-plus/web dev
 
 # Mobile만 실행
-pnpm --filter @worklog/mobile start
+pnpm --filter @worklog-plus/mobile start
 ```
 
 ### 빌드
@@ -68,7 +68,7 @@ pnpm --filter @worklog/mobile start
 pnpm build
 
 # 특정 앱만 빌드
-pnpm --filter @worklog/web build
+pnpm --filter @worklog-plus/web build
 ```
 
 ### 린트
@@ -164,13 +164,13 @@ hooks → (독립적)
 
 ## 스크립트
 
-| 명령어 | 설명 |
-|--------|------|
-| `pnpm dev` | 개발 서버 실행 |
-| `pnpm build` | 프로덕션 빌드 |
-| `pnpm lint` | 린트 검사 |
-| `pnpm clean` | 빌드 결과물 삭제 |
-| `pnpm format` | 코드 포맷팅 |
+| 명령어        | 설명             |
+| ------------- | ---------------- |
+| `pnpm dev`    | 개발 서버 실행   |
+| `pnpm build`  | 프로덕션 빌드    |
+| `pnpm lint`   | 린트 검사        |
+| `pnpm clean`  | 빌드 결과물 삭제 |
+| `pnpm format` | 코드 포맷팅      |
 
 ## 환경 변수
 

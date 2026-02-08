@@ -15,9 +15,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@worklog/ui';
+} from '@worklog-plus/ui';
 import { ArrowLeft, Mail, Calendar, Clock } from 'lucide-react';
-import type { UserDetail, UserRole } from '@worklog/types';
+import type { UserDetail, UserRole } from '@worklog-plus/types';
 
 const mockUserDetail: UserDetail = {
   id: '2',

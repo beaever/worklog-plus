@@ -1,5 +1,5 @@
 {
-  "name": "@worklog/store",
+  "name": "@worklog-plus/store",
   "version": "0.0.1",
   "private": true,
   "main": "./src/index.ts",
@@ -12,11 +12,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@worklog/types": "workspace:*",
+    "@worklog-plus/types": "workspace:*",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "@worklog/config": "workspace:*",
+    "@worklog-plus/config": "workspace:*",
     "typescript": "^5.7.2"
   }
 }

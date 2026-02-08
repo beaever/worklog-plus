@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardHeader, CardContent, Badge, Button } from '@worklog/ui';
+import { Card, CardHeader, CardContent, Badge, Button } from '@worklog-plus/ui';
 import { Calendar, Clock, MoreVertical, Edit, Trash2 } from 'lucide-react';
-import type { Worklog } from '@worklog/types';
+import type { Worklog } from '@worklog-plus/types';
 
 interface WorklogCardProps {
   worklog: Worklog;

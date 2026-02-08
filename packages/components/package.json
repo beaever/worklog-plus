@@ -1,5 +1,5 @@
 {
-  "name": "@worklog/components",
+  "name": "@worklog-plus/components",
   "version": "0.0.1",
   "private": true,
   "main": "./src/index.ts",
@@ -33,12 +33,12 @@
     "react": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@worklog/ui": "workspace:*",
-    "@worklog/types": "workspace:*",
+    "@worklog-plus/ui": "workspace:*",
+    "@worklog-plus/types": "workspace:*",
     "lucide-react": "^0.344.0"
   },
   "devDependencies": {
-    "@worklog/config": "workspace:*",
+    "@worklog-plus/config": "workspace:*",
     "@types/react": "^18.2.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0"

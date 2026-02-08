@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardHeader, CardContent, Button } from '@worklog/ui';
+import { Card, CardHeader, CardContent, Button } from '@worklog-plus/ui';
 import { Bell, LogOut, User, Shield } from 'lucide-react';
-import { useUserStore } from '@worklog/store';
+import { useUserStore } from '@worklog-plus/store';
 
 export default function SettingsPage() {
   const router = useRouter();

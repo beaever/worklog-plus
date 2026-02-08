@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Button } from '@worklog/ui';
+import { Button } from '@worklog-plus/ui';
 import { ShieldX, ArrowLeft } from 'lucide-react';
 
 export default function ForbiddenPage() {

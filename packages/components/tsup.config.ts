@@ -7,7 +7,7 @@ export default defineConfig({
   splitting: true,
   sourcemap: true,
   clean: true,
-  external: ['react', 'react-dom', '@worklog/ui', '@worklog/types'],
+  external: ['react', 'react-dom', '@worklog-plus/ui', '@worklog-plus/types'],
   treeshake: true,
   minify: true,
 });

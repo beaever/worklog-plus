@@ -1,5 +1,5 @@
 {
-  "name": "@worklog/hooks",
+  "name": "@worklog-plus/hooks",
   "version": "0.0.1",
   "private": true,
   "main": "./src/index.ts",
@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@types/react": "^19.0.2",
-    "@worklog/config": "workspace:*",
+    "@worklog-plus/config": "workspace:*",
     "react": "^19.0.0",
     "typescript": "^5.7.2"
   }

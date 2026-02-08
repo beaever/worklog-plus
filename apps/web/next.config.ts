@@ -1,13 +1,13 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: [
-    "@worklog/ui",
-    "@worklog/hooks",
-    "@worklog/store",
-    "@worklog/api",
-    "@worklog/types",
+    '@worklog-plus/ui',
+    '@worklog-plus/hooks',
+    '@worklog-plus/store',
+    '@worklog-plus/api',
+    '@worklog-plus/types',
   ],
 };
 

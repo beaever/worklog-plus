@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { User } from '@worklog/types';
+import type { User } from '@worklog-plus/types';
 
 interface AuthTokens {
   accessToken: string;

@@ -1,5 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Button } from '@worklog/ui';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  Button,
+} from '@worklog-plus/ui';
 
 const meta: Meta<typeof Card> = {
   title: 'Atoms/Card',
@@ -15,7 +23,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <Card className="w-80">
+    <Card className='w-80'>
       <CardHeader>
         <CardTitle>카드 제목</CardTitle>
         <CardDescription>카드 설명입니다.</CardDescription>
@@ -29,18 +37,18 @@ export const Default: Story = {
 
 export const WithFooter: Story = {
   render: () => (
-    <Card className="w-80">
+    <Card className='w-80'>
       <CardHeader>
         <CardTitle>프로젝트 생성</CardTitle>
         <CardDescription>새 프로젝트를 생성합니다.</CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground">
+        <p className='text-sm text-muted-foreground'>
           프로젝트를 생성하면 업무일지를 관리할 수 있습니다.
         </p>
       </CardContent>
-      <CardFooter className="flex justify-end gap-2">
-        <Button variant="outline">취소</Button>
+      <CardFooter className='flex justify-end gap-2'>
+        <Button variant='outline'>취소</Button>
         <Button>생성</Button>
       </CardFooter>
     </Card>
@@ -49,12 +57,12 @@ export const WithFooter: Story = {
 
 export const Clickable: Story = {
   render: () => (
-    <Card className="w-80 cursor-pointer transition-shadow hover:shadow-md">
+    <Card className='w-80 cursor-pointer transition-shadow hover:shadow-md'>
       <CardHeader>
         <CardTitle>클릭 가능한 카드</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground">
+        <p className='text-sm text-muted-foreground'>
           호버하면 그림자가 생깁니다.
         </p>
       </CardContent>

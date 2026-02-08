@@ -1,5 +1,5 @@
 import type { Preview } from '@storybook/react';
-import '@worklog/ui/globals.css';
+import '@worklog-plus/ui/globals.css';
 
 const preview: Preview = {
   parameters: {

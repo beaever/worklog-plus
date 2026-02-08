@@ -12,8 +12,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@worklog/ui';
-import type { Worklog, WorklogCreateInput } from '@worklog/types';
+} from '@worklog-plus/ui';
+import type { Worklog, WorklogCreateInput } from '@worklog-plus/types';
 
 interface Project {
   id: string;

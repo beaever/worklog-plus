@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Button } from '@worklog/ui';
+import { Button } from '@worklog-plus/ui';
 import { Menu, Bell, User, LogOut, Settings } from 'lucide-react';
-import { useUserStore } from '@worklog/store';
+import { useUserStore } from '@worklog-plus/store';
 import { MobileSidebar } from './mobile-sidebar';
 
 export function Header() {

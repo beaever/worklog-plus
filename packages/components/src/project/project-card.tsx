@@ -1,8 +1,8 @@
 'use client';
 
-import { Card, CardHeader, CardContent, Badge } from '@worklog/ui';
+import { Card, CardHeader, CardContent, Badge } from '@worklog-plus/ui';
 import { FolderOpen, Clock } from 'lucide-react';
-import type { ProjectSummary, ProjectStatus } from '@worklog/types';
+import type { ProjectSummary, ProjectStatus } from '@worklog-plus/types';
 
 const statusConfig: Record<
   ProjectStatus,

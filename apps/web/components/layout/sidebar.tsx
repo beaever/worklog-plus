@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cn } from '@worklog/ui';
-import { useUserStore } from '@worklog/store';
+import { cn } from '@worklog-plus/ui';
+import { useUserStore } from '@worklog-plus/store';
 import {
   LayoutDashboard,
   FolderOpen,

@@ -8,7 +8,7 @@ import type {
   TimelineEvent,
   ActivityLog,
   UpdateProjectInput,
-} from '@worklog/types';
+} from '@worklog-plus/types';
 
 // Mock data - API 연동 시 제거
 const mockProject: Project = {

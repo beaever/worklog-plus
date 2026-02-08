@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Button } from '@worklog/ui';
+import { Button } from '@worklog-plus/ui';
 import { Menu, User, LogOut, Settings } from 'lucide-react';
-import { useUserStore } from '@worklog/store';
+import { useUserStore } from '@worklog-plus/store';
 import { AdminMobileSidebar } from './admin-mobile-sidebar';
 
 export function AdminHeader() {
@@ -66,9 +66,7 @@ export function AdminHeader() {
                     <p className='text-sm text-muted-foreground'>
                       {user.email}
                     </p>
-                    <p className='mt-1 text-xs text-primary'>
-                      {user.role}
-                    </p>
+                    <p className='mt-1 text-xs text-primary'>{user.role}</p>
                   </div>
                 )}
                 <div className='p-1'>

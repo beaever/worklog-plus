@@ -1,5 +1,5 @@
 {
-  "extends": "@worklog/config/typescript/nextjs.json",
+  "extends": "@worklog-plus/config/typescript/nextjs.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

@@ -7,7 +7,7 @@ import type {
   UpdateProjectInput,
   PaginatedResponse,
   ProjectStatus,
-} from '@worklog/types';
+} from '@worklog-plus/types';
 import { apiClient } from './client';
 
 export interface ProjectListParams {

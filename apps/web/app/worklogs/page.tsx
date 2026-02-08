@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Button, EmptyState, Input } from '@worklog/ui';
+import { Button, EmptyState, Input } from '@worklog-plus/ui';
 import { FileText, Plus, Search } from 'lucide-react';
-import type { Worklog } from '@worklog/types';
+import type { Worklog } from '@worklog-plus/types';
 import { WorklogCard } from '@/components/worklog/worklog-card';
 import { WorklogFormModal } from '@/components/worklog/worklog-form-modal';
 

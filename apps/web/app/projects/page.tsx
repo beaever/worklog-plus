@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Button, EmptyState } from '@worklog/ui';
+import { Button, EmptyState } from '@worklog-plus/ui';
 import { FolderOpen, Plus } from 'lucide-react';
-import { useProjectStore } from '@worklog/store';
+import { useProjectStore } from '@worklog-plus/store';
 import type {
   ProjectStatus,
   ProjectSummary,
   CreateProjectInput,
-} from '@worklog/types';
+} from '@worklog-plus/types';
 import { ProjectCard } from '@/components/project/project-card';
 import { ProjectFilter } from '@/components/project/project-filter';
 import { ProjectFormModal } from '@/components/project/project-form-modal';

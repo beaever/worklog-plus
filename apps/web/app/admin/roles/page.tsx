@@ -9,9 +9,9 @@ import {
   CardDescription,
   Badge,
   Button,
-} from '@worklog/ui';
+} from '@worklog-plus/ui';
 import { Shield, Users, ChevronRight } from 'lucide-react';
-import type { Role } from '@worklog/types';
+import type { Role } from '@worklog-plus/types';
 
 const mockRoles: Role[] = [
   {

@@ -1,8 +1,14 @@
 'use client';
 
-import { Card, CardHeader, CardTitle, CardContent, Button } from '@worklog/ui';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Button,
+} from '@worklog-plus/ui';
 import { User } from 'lucide-react';
-import type { ActivityLog } from '@worklog/types';
+import type { ActivityLog } from '@worklog-plus/types';
 
 interface ProjectActivityLogProps {
   activities: ActivityLog[];

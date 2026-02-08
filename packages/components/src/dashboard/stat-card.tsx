@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardHeader, CardContent } from '@worklog/ui';
+import { Card, CardHeader, CardContent } from '@worklog-plus/ui';
 import type { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
@@ -33,9 +33,7 @@ export function StatCard({
           <p className='text-xs text-muted-foreground'>
             {trend && (
               <span
-                className={
-                  trend.isPositive ? 'text-green-600' : 'text-red-600'
-                }
+                className={trend.isPositive ? 'text-green-600' : 'text-red-600'}
               >
                 {trend.isPositive ? '+' : '-'}
                 {trend.value}%{' '}

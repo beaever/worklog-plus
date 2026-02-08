@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { WorklogCard } from '@worklog/components';
-import type { Worklog } from '@worklog/types';
+import { WorklogCard } from '@worklog-plus/components';
+import type { Worklog } from '@worklog-plus/types';
 
 const meta: Meta<typeof WorklogCard> = {
   title: 'Organisms/WorklogCard',
@@ -96,7 +96,7 @@ export const LongDuration: Story = {
 
 export const WorklogList: Story = {
   render: () => (
-    <div className="space-y-4 w-[600px]">
+    <div className='space-y-4 w-[600px]'>
       <WorklogCard
         worklog={{
           id: '1',
@@ -109,7 +109,7 @@ export const WorklogList: Story = {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         }}
-        projectName="WorkLog+ 백엔드"
+        projectName='WorkLog+ 백엔드'
       />
       <WorklogCard
         worklog={{
@@ -123,7 +123,7 @@ export const WorklogList: Story = {
           createdAt: new Date(Date.now() - 86400000).toISOString(),
           updatedAt: new Date(Date.now() - 86400000).toISOString(),
         }}
-        projectName="WorkLog+ 프론트엔드"
+        projectName='WorkLog+ 프론트엔드'
       />
       <WorklogCard
         worklog={{
@@ -137,7 +137,7 @@ export const WorklogList: Story = {
           createdAt: new Date(Date.now() - 172800000).toISOString(),
           updatedAt: new Date(Date.now() - 172800000).toISOString(),
         }}
-        projectName="WorkLog+ 백엔드"
+        projectName='WorkLog+ 백엔드'
       />
     </div>
   ),

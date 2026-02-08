@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { StatCard } from '@worklog/components';
+import { StatCard } from '@worklog-plus/components';
 import { FolderOpen, FileText, Clock, CheckCircle } from 'lucide-react';
 
 const meta: Meta<typeof StatCard> = {
@@ -64,31 +64,34 @@ export const CompletedProjects: Story = {
 
 export const DashboardStats: Story = {
   render: () => (
-    <div className="grid gap-4 w-[900px]" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+    <div
+      className='grid gap-4 w-[900px]'
+      style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}
+    >
       <StatCard
-        title="총 프로젝트"
+        title='총 프로젝트'
         value={12}
-        description="활성 프로젝트 8개"
+        description='활성 프로젝트 8개'
         icon={FolderOpen}
       />
       <StatCard
-        title="이번 주 업무일지"
+        title='이번 주 업무일지'
         value={24}
-        description="전주 대비"
+        description='전주 대비'
         icon={FileText}
         trend={{ value: 12, isPositive: true }}
       />
       <StatCard
-        title="총 작업 시간"
-        value="156h"
-        description="이번 달 누적"
+        title='총 작업 시간'
+        value='156h'
+        description='이번 달 누적'
         icon={Clock}
         trend={{ value: 8, isPositive: true }}
       />
       <StatCard
-        title="완료된 프로젝트"
+        title='완료된 프로젝트'
         value={4}
-        description="이번 분기"
+        description='이번 분기'
         icon={CheckCircle}
       />
     </div>

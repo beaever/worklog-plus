@@ -1,5 +1,5 @@
 {
-  "name": "@worklog/storybook",
+  "name": "@worklog-plus/storybook",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -8,9 +8,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@worklog/ui": "workspace:*",
-    "@worklog/components": "workspace:*",
-    "@worklog/types": "workspace:*",
+    "@worklog-plus/ui": "workspace:*",
+    "@worklog-plus/components": "workspace:*",
+    "@worklog-plus/types": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "lucide-react": "^0.344.0"

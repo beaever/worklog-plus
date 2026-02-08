@@ -12,13 +12,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@worklog/ui';
+} from '@worklog-plus/ui';
 import type {
   Project,
   CreateProjectInput,
   UpdateProjectInput,
   ProjectStatus,
-} from '@worklog/types';
+} from '@worklog-plus/types';
 
 type ProjectFormModalProps = {
   open: boolean;

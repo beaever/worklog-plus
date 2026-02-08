@@ -1,8 +1,8 @@
 'use client';
 
-import { Card, CardHeader, CardContent, Badge } from '@worklog/ui';
+import { Card, CardHeader, CardContent, Badge } from '@worklog-plus/ui';
 import { Calendar, Clock } from 'lucide-react';
-import type { Worklog } from '@worklog/types';
+import type { Worklog } from '@worklog-plus/types';
 
 interface WorklogCardProps {
   worklog: Worklog;
