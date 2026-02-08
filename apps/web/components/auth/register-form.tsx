@@ -66,6 +66,7 @@ export function RegisterForm() {
       email,
       name: name.trim(),
       role: 'USER',
+      status: 'ACTIVE',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
