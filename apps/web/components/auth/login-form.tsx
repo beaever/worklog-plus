@@ -54,7 +54,7 @@ export function LoginForm() {
       id: generateUUID(),
       email,
       name: email.split('@')[0] ?? 'User',
-      role: 'ADMIN',
+      role: 'USER', // @TODO: role을 선택할 수 있도록 수정 (관리자 필요시 "ADMIN" | "SYSTEM_ADMIN" 으로 변경하여 사용)
       status: 'ACTIVE',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
