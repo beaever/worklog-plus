@@ -54,7 +54,8 @@ export function LoginForm() {
       id: generateUUID(),
       email,
       name: email.split('@')[0] ?? 'User',
-      role: 'USER',
+      role: 'ADMIN',
+      status: 'ACTIVE',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
