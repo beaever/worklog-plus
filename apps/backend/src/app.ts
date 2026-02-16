@@ -1,6 +1,6 @@
 /**
  * Express 애플리케이션 설정
- * 
+ *
  * @description
  * - Express 앱 인스턴스 생성 및 미들웨어 설정
  * - 라우트 등록
@@ -16,7 +16,7 @@ import { env } from './config/env';
 
 /**
  * Express 애플리케이션 생성 및 설정
- * 
+ *
  * @returns {Application} 설정된 Express 앱 인스턴스
  */
 const createApp = (): Application => {
@@ -78,15 +78,15 @@ const createApp = (): Application => {
 
   /**
    * GET /health
-   * 
+   *
    * @description 서버 상태 확인용 엔드포인트
    * @returns {object} 서버 상태 정보
-   * 
+   *
    * @example
    * curl http://localhost:8080/health
    * // { "status": "ok", "timestamp": "2026-02-15T06:24:00.000Z" }
    */
-  app.get('/health', (req: Request, res: Response) => {
+  app.get('/health', (_req: Request, res: Response) => {
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
@@ -95,19 +95,10 @@ const createApp = (): Application => {
   });
 
   // ============================================
-  // API 라우트 (나중에 추가)
+  // API 라우트
   // ============================================
-
-  /**
-   * API 라우트 등록
-   * 모든 API는 /api 접두사를 사용합니다
-   */
-  // app.use('/api/auth', authRoutes);
-  // app.use('/api/users', usersRoutes);
-  // app.use('/api/projects', projectsRoutes);
-  // app.use('/api/worklogs', worklogsRoutes);
-  // app.use('/api/dashboard', dashboardRoutes);
-  // app.use('/api/admin', adminRoutes);
+  const routes = require('./routes').default;
+  app.use('/api', routes);
 
   // ============================================
   // 404 핸들러
