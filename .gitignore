@@ -6,6 +6,8 @@ node_modules
 dist
 .next
 .turbo
+# Storybook build output
+storybook-static
 out
 
 # Environment
