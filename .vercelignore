@@ -1,0 +1,5 @@
+apps/backend
+apps/mobile
+apps/storybook
+.turbo
+node_modules
