@@ -20,7 +20,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
     "ci": "turbo typecheck lint build test",
-    "prepare": "turbo typecheck"
+    "prepare": "turbo typecheck",
+    "chromatic": "chromatic --storybook-base-dir=apps/storybook"
   },
   "devDependencies": {
     "prettier": "^3.4.2",

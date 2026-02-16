@@ -1,0 +1,201 @@
+// Prisma 스키마 파일
+// 데이터베이스 모델 정의 및 관계 설정
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// 사용자 (Users)
+// ============================================
+
+/// 사용자 테이블
+/// 시스템의 모든 사용자 정보를 저장합니다
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String
+  role         String    @default("USER") // USER, MANAGER, ADMIN, SYSTEM_ADMIN
+  status       String    @default("ACTIVE") // ACTIVE, SUSPENDED
+  avatarUrl    String?   @map("avatar_url")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // 관계 (Relations)
+  projects       Project[]       @relation("ProjectOwner")
+  worklogs       Worklog[]
+  projectMembers ProjectMember[]
+  refreshTokens  RefreshToken[]
+  activityLogs   ActivityLog[]
+  auditLogs      AuditLog[]
+
+  // 인덱스
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@map("users")
+}
+
+// ============================================
+// 프로젝트 (Projects)
+// ============================================
+
+/// 프로젝트 테이블
+/// 업무일지가 속하는 프로젝트 정보를 저장합니다
+model Project {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  status      String    @default("PLANNED") // PLANNED, ACTIVE, DONE
+  startDate   DateTime  @map("start_date") @db.Date
+  endDate     DateTime? @map("end_date") @db.Date
+  ownerId     String    @map("owner_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // 관계 (Relations)
+  owner        User            @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  worklogs     Worklog[]
+  members      ProjectMember[]
+  activityLogs ActivityLog[]
+
+  // 인덱스
+  @@index([ownerId])
+  @@index([status])
+  @@index([startDate, endDate])
+  @@map("projects")
+}
+
+// ============================================
+// 업무일지 (Worklogs)
+// ============================================
+
+/// 업무일지 테이블
+/// 일일 업무 내용과 소요 시간을 기록합니다
+model Worklog {
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  userId    String   @map("user_id")
+  title     String
+  content   String   @db.Text
+  date      DateTime @db.Date
+  duration  Int // 소요 시간 (시간 단위)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 관계 (Relations)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 인덱스
+  @@index([projectId])
+  @@index([userId])
+  @@index([date])
+  @@map("worklogs")
+}
+
+// ============================================
+// 프로젝트 멤버 (Project Members)
+// ============================================
+
+/// 프로젝트 멤버십 테이블
+/// 사용자의 프로젝트 접근 권한을 관리합니다
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  userId    String   @map("user_id")
+  access    String   @default("READ") // NONE, READ, WRITE
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  // 관계 (Relations)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 제약 조건: 한 사용자는 한 프로젝트에 한 번만 참여 가능
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@map("project_members")
+}
+
+// ============================================
+// 리프레시 토큰 (Refresh Tokens)
+// ============================================
+
+/// 리프레시 토큰 테이블
+/// JWT 토큰 갱신을 위한 리프레시 토큰을 저장합니다
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // 관계 (Relations)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 인덱스
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+// ============================================
+// 활동 로그 (Activity Logs)
+// ============================================
+
+/// 활동 로그 테이블
+/// 프로젝트 내 사용자 활동을 기록합니다
+model ActivityLog {
+  id          String   @id @default(uuid())
+  projectId   String?  @map("project_id")
+  userId      String   @map("user_id")
+  action      String // 'created_project', 'updated_worklog', etc.
+  description String
+  metadata    Json? // 추가 정보 (JSON 형태)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // 관계 (Relations)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // 인덱스
+  @@index([projectId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+// ============================================
+// 감사 로그 (Audit Logs)
+// ============================================
+
+/// 감사 로그 테이블
+/// 시스템 전체의 중요한 변경 사항을 기록합니다 (관리자용)
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String // USER_CREATED, PROJECT_DELETED, etc.
+  actorId    String   @map("actor_id")
+  targetType String?  @map("target_type") // USER, PROJECT, ROLE, SYSTEM
+  targetId   String?  @map("target_id")
+  targetName String?  @map("target_name")
+  metadata   Json? // 추가 정보 (JSON 형태)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // 관계 (Relations)
+  actor User @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  // 인덱스
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
