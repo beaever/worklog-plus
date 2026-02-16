@@ -1,6 +1,6 @@
 /**
  * 인증 미들웨어
- * 
+ *
  * @description
  * - JWT 토큰 검증
  * - 사용자 인증 확인
@@ -12,7 +12,7 @@ import { verifyAccessToken, JwtPayload } from '../utils/jwt';
 
 /**
  * 인증된 요청 인터페이스
- * 
+ *
  * @description
  * - Express Request를 확장하여 user 속성 추가
  * - 미들웨어를 통과한 요청에는 user 정보가 포함됩니다
@@ -23,16 +23,16 @@ export interface AuthRequest extends Request {
 
 /**
  * JWT 인증 미들웨어
- * 
+ *
  * @description
  * - Authorization 헤더에서 JWT 토큰을 추출합니다
  * - 토큰을 검증하고 사용자 정보를 req.user에 저장합니다
  * - 인증 실패 시 401 Unauthorized 응답을 반환합니다
- * 
+ *
  * @param {AuthRequest} req - Express 요청 객체
  * @param {Response} res - Express 응답 객체
  * @param {NextFunction} next - 다음 미들웨어 함수
- * 
+ *
  * @example
  * // 라우트에 적용
  * router.get('/profile', authenticate, (req: AuthRequest, res) => {
@@ -48,7 +48,7 @@ export const authenticate = (
   try {
     // Authorization 헤더 확인
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader) {
       res.status(401).json({
         success: false,
@@ -87,8 +87,9 @@ export const authenticate = (
     next();
   } catch (error) {
     // 토큰 검증 실패
-    const errorMessage = error instanceof Error ? error.message : '토큰 검증 실패';
-    
+    const errorMessage =
+      error instanceof Error ? error.message : '토큰 검증 실패';
+
     res.status(401).json({
       success: false,
       error: errorMessage,
@@ -98,19 +99,19 @@ export const authenticate = (
 
 /**
  * 역할 기반 권한 검증 미들웨어
- * 
+ *
  * @description
  * - 사용자의 역할이 허용된 역할 목록에 포함되는지 확인합니다
  * - authenticate 미들웨어 이후에 사용해야 합니다
  * - 권한이 없으면 403 Forbidden 응답을 반환합니다
- * 
+ *
  * @param {...string[]} allowedRoles - 허용된 역할 목록
  * @returns {Function} Express 미들웨어 함수
- * 
+ *
  * @example
  * // 관리자만 접근 가능
  * router.delete('/users/:id', authenticate, authorize('ADMIN', 'SYSTEM_ADMIN'), deleteUser);
- * 
+ *
  * // 매니저 이상만 접근 가능
  * router.post('/projects', authenticate, authorize('MANAGER', 'ADMIN', 'SYSTEM_ADMIN'), createProject);
  */
@@ -145,22 +146,22 @@ export const authorize = (...allowedRoles: string[]) => {
 
 /**
  * 선택적 인증 미들웨어
- * 
+ *
  * @description
  * - 토큰이 있으면 검증하고, 없어도 다음 미들웨어로 진행합니다
  * - 공개 API이지만 로그인 시 추가 정보를 제공하는 경우 사용
- * 
+ *
  * @param {AuthRequest} req - Express 요청 객체
  * @param {Response} res - Express 응답 객체
  * @param {NextFunction} next - 다음 미들웨어 함수
- * 
+ *
  * @example
  * // 로그인 여부와 관계없이 접근 가능하지만, 로그인 시 추가 정보 제공
  * router.get('/projects', optionalAuthenticate, getProjects);
  */
 export const optionalAuthenticate = (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ): void => {
   try {
@@ -192,15 +193,15 @@ export const optionalAuthenticate = (
 
 /**
  * 본인 확인 미들웨어
- * 
+ *
  * @description
  * - URL 파라미터의 userId와 인증된 사용자의 userId가 일치하는지 확인합니다
  * - 관리자는 모든 사용자에 접근 가능합니다
- * 
+ *
  * @param {AuthRequest} req - Express 요청 객체
  * @param {Response} res - Express 응답 객체
  * @param {NextFunction} next - 다음 미들웨어 함수
- * 
+ *
  * @example
  * // 본인의 프로필만 수정 가능 (관리자는 모든 프로필 수정 가능)
  * router.patch('/users/:userId', authenticate, checkOwnership, updateUser);

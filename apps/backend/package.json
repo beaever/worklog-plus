@@ -1,5 +1,5 @@
 {
-  "name": "@worklog-plus/api",
+  "name": "@worklog-plus/backend",
   "version": "0.0.1",
   "private": true,
   "description": "WorkLog+ 백엔드 API 서버 - Express + Prisma + PostgreSQL",
