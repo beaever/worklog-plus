@@ -10,17 +10,24 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@worklog-plus/ui';
-
-const data = [
-  { month: '1월', worklogs: 45, hours: 120 },
-  { month: '2월', worklogs: 52, hours: 135 },
-  { month: '3월', worklogs: 48, hours: 128 },
-  { month: '4월', worklogs: 61, hours: 156 },
-  { month: '5월', worklogs: 55, hours: 142 },
-  { month: '6월', worklogs: 67, hours: 168 },
-];
+import { useMonthlyTrend } from '@/hooks/use-dashboard';
 
 export function MonthlyTrendChart() {
+  const { data, isLoading } = useMonthlyTrend();
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>월별 추이</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className='h-[300px] animate-pulse rounded-lg bg-muted' />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -29,7 +36,7 @@ export function MonthlyTrendChart() {
       <CardContent>
         <div className='h-[300px]'>
           <ResponsiveContainer width='100%' height='100%'>
-            <BarChart data={data}>
+            <BarChart data={data || []}>
               <CartesianGrid strokeDasharray='3 3' className='stroke-muted' />
               <XAxis
                 dataKey='month'
