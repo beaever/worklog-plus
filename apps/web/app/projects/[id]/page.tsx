@@ -11,8 +11,13 @@ import { ProjectTimeline } from '@/components/project/project-timeline';
 import { ProjectActivityLog } from '@/components/project/project-activity-log';
 import { ProjectFormModal } from '@/components/project/project-form-modal';
 import { DeleteProjectDialog } from '@/components/project/delete-project-dialog';
-import { useProjectStore } from '@worklog-plus/store';
-import { useProjectDetail } from '@/hooks/use-project-detail';
+import {
+  useProject,
+  useProjectDashboard,
+  useProjectActivities,
+  useUpdateProject,
+  useDeleteProject,
+} from '@/hooks/use-projects';
 
 const statusConfig: Record<
   ProjectStatus,
@@ -28,23 +33,24 @@ export default function ProjectDetailPage() {
   const params = useParams();
   const projectId = params.id as string;
 
-  const { updateProject: updateProjectStore, removeProject } =
-    useProjectStore();
+  const { data: project, isLoading: isLoadingProject } = useProject(projectId);
+  const { data: dashboard, isLoading: isLoadingDashboard } =
+    useProjectDashboard(projectId);
   const {
-    project,
-    kpi,
-    progress,
-    timeline,
-    activities,
-    isLoading,
-    hasMoreActivities,
-    updateProject,
-    deleteProject,
-    loadMoreActivities,
-  } = useProjectDetail({ projectId });
+    data: activitiesData,
+    fetchNextPage,
+    hasNextPage,
+    isLoading: isLoadingActivities,
+  } = useProjectActivities(projectId);
+
+  const updateProjectMutation = useUpdateProject();
+  const deleteProjectMutation = useDeleteProject();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const isLoading =
+    isLoadingProject || isLoadingDashboard || isLoadingActivities;
 
   if (isLoading || !project) {
     return (
@@ -56,15 +62,29 @@ export default function ProjectDetailPage() {
 
   const { label, variant } = statusConfig[project.status];
 
+  const activities =
+    activitiesData?.pages.flatMap((page) => page?.data || []) || [];
+  const kpi = dashboard?.kpi;
+  const progress = dashboard?.progress;
+  const timeline = dashboard?.timeline || [];
+
   const handleUpdateProject = async (data: UpdateProjectInput) => {
-    await updateProject(data);
-    updateProjectStore(project.id, data);
+    updateProjectMutation.mutate(
+      { id: projectId, data },
+      {
+        onSuccess: () => {
+          setIsEditModalOpen(false);
+        },
+      },
+    );
   };
 
   const handleDeleteProject = async () => {
-    await deleteProject();
-    removeProject(project.id);
-    router.push('/projects');
+    deleteProjectMutation.mutate(projectId, {
+      onSuccess: () => {
+        router.push('/projects');
+      },
+    });
   };
 
   return (
@@ -115,8 +135,8 @@ export default function ProjectDetailPage() {
       {/* Activity Log */}
       <ProjectActivityLog
         activities={activities}
-        hasMore={hasMoreActivities}
-        onLoadMore={loadMoreActivities}
+        hasMore={hasNextPage || false}
+        onLoadMore={() => fetchNextPage()}
       />
 
       {/* Edit Modal */}

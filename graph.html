@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Graph</title>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/viz.js@2.1.2-pre.1/viz.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/viz.js@2.1.2-pre.1/full.render.js"></script>
+  <script>
+const s = `
+digraph {
+	compound = "true"
+	newrank = "true"
+	subgraph "root" {
+		"[root] @worklog-plus/api#build" -> "[root] @worklog-plus/api#typecheck"
+		"[root] @worklog-plus/api#build" -> "[root] @worklog-plus/config#build"
+		"[root] @worklog-plus/api#build" -> "[root] @worklog-plus/types#build"
+		"[root] @worklog-plus/api#typecheck" -> "[root] @worklog-plus/config#typecheck"
+		"[root] @worklog-plus/api#typecheck" -> "[root] @worklog-plus/types#typecheck"
+		"[root] @worklog-plus/backend#build" -> "[root] @worklog-plus/backend#typecheck"
+		"[root] @worklog-plus/backend#build" -> "[root] @worklog-plus/config#build"
+		"[root] @worklog-plus/backend#typecheck" -> "[root] @worklog-plus/config#typecheck"
+		"[root] @worklog-plus/components#build" -> "[root] @worklog-plus/components#typecheck"
+		"[root] @worklog-plus/components#build" -> "[root] @worklog-plus/config#build"
+		"[root] @worklog-plus/components#build" -> "[root] @worklog-plus/types#build"
+		"[root] @worklog-plus/components#build" -> "[root] @worklog-plus/ui#build"
+		"[root] @worklog-plus/components#typecheck" -> "[root] @worklog-plus/config#typecheck"
+		"[root] @worklog-plus/components#typecheck" -> "[root] @worklog-plus/types#typecheck"
+		"[root] @worklog-plus/components#typecheck" -> "[root] @worklog-plus/ui#typecheck"
+		"[root] @worklog-plus/config#build" -> "[root] @worklog-plus/config#typecheck"
+		"[root] @worklog-plus/config#typecheck" -> "[root] ___ROOT___"
+		"[root] @worklog-plus/hooks#build" -> "[root] @worklog-plus/config#build"
+		"[root] @worklog-plus/hooks#build" -> "[root] @worklog-plus/hooks#typecheck"
+		"[root] @worklog-plus/hooks#typecheck" -> "[root] @worklog-plus/config#typecheck"
+		"[root] @worklog-plus/mobile#build" -> "[root] @worklog-plus/config#build"
+		"[root] @worklog-plus/mobile#build" -> "[root] @worklog-plus/mobile#typecheck"
+		"[root] @worklog-plus/mobile#build" -> "[root] @worklog-plus/types#build"
+		"[root] @worklog-plus/mobile#typecheck" -> "[root] @worklog-plus/config#typecheck"
+		"[root] @worklog-plus/mobile#typecheck" -> "[root] @worklog-plus/types#typecheck"
+		"[root] @worklog-plus/store#build" -> "[root] @worklog-plus/config#build"
+		"[root] @worklog-plus/store#build" -> "[root] @worklog-plus/store#typecheck"
+		"[root] @worklog-plus/store#build" -> "[root] @worklog-plus/types#build"
+		"[root] @worklog-plus/store#typecheck" -> "[root] @worklog-plus/config#typecheck"
+		"[root] @worklog-plus/store#typecheck" -> "[root] @worklog-plus/types#typecheck"
+		"[root] @worklog-plus/storybook#build" -> "[root] @worklog-plus/components#build"
+		"[root] @worklog-plus/storybook#build" -> "[root] @worklog-plus/storybook#typecheck"
+		"[root] @worklog-plus/storybook#build" -> "[root] @worklog-plus/types#build"
+		"[root] @worklog-plus/storybook#build" -> "[root] @worklog-plus/ui#build"
+		"[root] @worklog-plus/storybook#typecheck" -> "[root] @worklog-plus/components#typecheck"
+		"[root] @worklog-plus/storybook#typecheck" -> "[root] @worklog-plus/types#typecheck"
+		"[root] @worklog-plus/storybook#typecheck" -> "[root] @worklog-plus/ui#typecheck"
+		"[root] @worklog-plus/types#build" -> "[root] @worklog-plus/config#build"
+		"[root] @worklog-plus/types#build" -> "[root] @worklog-plus/types#typecheck"
+		"[root] @worklog-plus/types#typecheck" -> "[root] @worklog-plus/config#typecheck"
+		"[root] @worklog-plus/ui#build" -> "[root] @worklog-plus/config#build"
+		"[root] @worklog-plus/ui#build" -> "[root] @worklog-plus/types#build"
+		"[root] @worklog-plus/ui#build" -> "[root] @worklog-plus/ui#typecheck"
+		"[root] @worklog-plus/ui#typecheck" -> "[root] @worklog-plus/config#typecheck"
+		"[root] @worklog-plus/ui#typecheck" -> "[root] @worklog-plus/types#typecheck"
+		"[root] @worklog-plus/web#build" -> "[root] @worklog-plus/api#build"
+		"[root] @worklog-plus/web#build" -> "[root] @worklog-plus/config#build"
+		"[root] @worklog-plus/web#build" -> "[root] @worklog-plus/hooks#build"
+		"[root] @worklog-plus/web#build" -> "[root] @worklog-plus/store#build"
+		"[root] @worklog-plus/web#build" -> "[root] @worklog-plus/types#build"
+		"[root] @worklog-plus/web#build" -> "[root] @worklog-plus/ui#build"
+		"[root] @worklog-plus/web#build" -> "[root] @worklog-plus/web#typecheck"
+		"[root] @worklog-plus/web#typecheck" -> "[root] @worklog-plus/api#typecheck"
+		"[root] @worklog-plus/web#typecheck" -> "[root] @worklog-plus/config#typecheck"
+		"[root] @worklog-plus/web#typecheck" -> "[root] @worklog-plus/hooks#typecheck"
+		"[root] @worklog-plus/web#typecheck" -> "[root] @worklog-plus/store#typecheck"
+		"[root] @worklog-plus/web#typecheck" -> "[root] @worklog-plus/types#typecheck"
+		"[root] @worklog-plus/web#typecheck" -> "[root] @worklog-plus/ui#typecheck"
+	}
+}
+
+`.replace(/\_\_\_ROOT\_\_\_/g, "Root").replace(/\[root\]/g, "");new Viz().renderSVGElement(s).then(el => document.body.appendChild(el)).catch(e => console.error(e));
+  </script>
+</body>
+</html>

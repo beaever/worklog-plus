@@ -9,15 +9,32 @@ import {
   Tooltip,
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@worklog-plus/ui';
+import { useProjectDistribution } from '@/hooks/use-dashboard';
 
-const data = [
-  { name: '진행중', value: 8, color: 'hsl(var(--primary))' },
-  { name: '완료', value: 4, color: 'hsl(var(--chart-2))' },
-  { name: '대기', value: 3, color: 'hsl(var(--chart-3))' },
-  { name: '보류', value: 1, color: 'hsl(var(--chart-4))' },
+const COLORS = [
+  'hsl(var(--primary))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
 ];
 
 export function ProjectDistributionChart() {
+  const { data, isLoading } = useProjectDistribution();
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>프로젝트 현황</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className='h-[300px] animate-pulse rounded-lg bg-muted' />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -28,7 +45,7 @@ export function ProjectDistributionChart() {
           <ResponsiveContainer width='100%' height='100%'>
             <PieChart>
               <Pie
-                data={data}
+                data={data || []}
                 cx='50%'
                 cy='50%'
                 innerRadius={60}
@@ -36,8 +53,11 @@ export function ProjectDistributionChart() {
                 paddingAngle={2}
                 dataKey='value'
               >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                {(data || []).map((_entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip
