@@ -21,7 +21,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
     "ci": "turbo typecheck lint build test",
     "prepare": "turbo typecheck",
-    "chromatic": "chromatic --storybook-base-dir=apps/storybook"
+    "chromatic": "chromatic --storybook-base-dir=apps/storybook",
+    "graph": "turbo run build --graph=graph.html"
   },
   "devDependencies": {
     "prettier": "^3.4.2",

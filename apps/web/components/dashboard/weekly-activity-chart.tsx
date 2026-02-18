@@ -10,18 +10,24 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@worklog-plus/ui';
-
-const data = [
-  { day: '월', worklogs: 4, hours: 8 },
-  { day: '화', worklogs: 6, hours: 9 },
-  { day: '수', worklogs: 5, hours: 7 },
-  { day: '목', worklogs: 8, hours: 10 },
-  { day: '금', worklogs: 7, hours: 8 },
-  { day: '토', worklogs: 2, hours: 3 },
-  { day: '일', worklogs: 1, hours: 2 },
-];
+import { useWeeklyActivity } from '@/hooks/use-dashboard';
 
 export function WeeklyActivityChart() {
+  const { data, isLoading } = useWeeklyActivity();
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>주간 활동</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className='h-[300px] animate-pulse rounded-lg bg-muted' />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -30,7 +36,7 @@ export function WeeklyActivityChart() {
       <CardContent>
         <div className='h-[300px]'>
           <ResponsiveContainer width='100%' height='100%'>
-            <AreaChart data={data}>
+            <AreaChart data={data || []}>
               <defs>
                 <linearGradient id='colorWorklogs' x1='0' y1='0' x2='0' y2='1'>
                   <stop

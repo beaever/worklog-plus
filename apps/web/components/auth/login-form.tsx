@@ -1,23 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Input } from '@worklog-plus/ui';
-import { useUserStore } from '@worklog-plus/store';
-import type { User } from '@worklog-plus/types';
-import { generateUUID } from '@/lib/utils';
+import { useLogin } from '@/hooks/use-auth';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LoginForm() {
-  const router = useRouter();
-  const login = useUserStore((state) => state.login);
+  const loginMutation = useLogin();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = (): string | null => {
     if (!email.trim()) {
@@ -45,29 +40,14 @@ export function LoginForm() {
       return;
     }
 
-    setIsLoading(true);
-
-    // 모의 로그인 - 딜레이 추가하여 실제 API 호출처럼 보이게
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    const mockUser: User = {
-      id: generateUUID(),
-      email,
-      name: email.split('@')[0] ?? 'User',
-      role: 'USER', // @TODO: role을 선택할 수 있도록 수정 (관리자 필요시 "ADMIN" | "SYSTEM_ADMIN" 으로 변경하여 사용)
-      status: 'ACTIVE',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const mockTokens = {
-      accessToken: `mock_access_${Date.now()}`,
-      refreshToken: `mock_refresh_${Date.now()}`,
-    };
-
-    login(mockUser, mockTokens);
-    setIsLoading(false);
-    router.push('/dashboard');
+    loginMutation.mutate(
+      { email, password },
+      {
+        onError: (err) => {
+          setError(err.message || '로그인에 실패했습니다.');
+        },
+      },
+    );
   };
 
   return (
@@ -89,7 +69,7 @@ export function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          disabled={isLoading}
+          disabled={loginMutation.isPending}
         />
       </div>
 
@@ -103,12 +83,16 @@ export function LoginForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          disabled={isLoading}
+          disabled={loginMutation.isPending}
         />
       </div>
 
-      <Button type='submit' className='w-full' disabled={isLoading}>
-        {isLoading ? '로그인 중...' : '로그인'}
+      <Button
+        type='submit'
+        className='w-full'
+        disabled={loginMutation.isPending}
+      >
+        {loginMutation.isPending ? '로그인 중...' : '로그인'}
       </Button>
 
       <p className='text-center text-sm text-muted-foreground'>

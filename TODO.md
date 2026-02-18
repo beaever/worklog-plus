@@ -66,33 +66,34 @@
   - `apps/mobile/.env` 생성
   - `EXPO_PUBLIC_WEB_URL` 설정
 
-- [ ] **API 클라이언트 인증 헤더 추가**
-  - `packages/api/src/client.ts` 수정
-  - localStorage에서 토큰 읽어서 Authorization 헤더 추가
-  - 401 에러 시 자동 토큰 갱신 로직 구현
+- [x] **API 클라이언트 인증 헤더 추가**
+  - ✅ `packages/api/src/client.ts` 수정
+  - ✅ localStorage에서 토큰 읽어서 Authorization 헤더 추가
+  - ✅ 401 에러 시 자동 토큰 갱신 로직 구현
 
-- [ ] **프로젝트 API 연동**
-  - `apps/web/app/projects/page.tsx` - Mock 데이터 제거
-  - `apps/web/hooks/use-project-detail.ts` - TODO 주석 해제 및 실제 API 호출
-  - TanStack Query 훅 생성 (`useProjects`, `useProject`, `useCreateProject` 등)
+- [x] **프로젝트 API 연동**
+  - ✅ `apps/web/app/projects/page.tsx` - TanStack Query 훅으로 마이그레이션
+  - ✅ `apps/web/hooks/use-project-detail.ts` - 삭제 (TanStack Query 훅으로 대체)
+  - ✅ TanStack Query 훅 생성 (`useProjects`, `useProject`, `useCreateProject`, `useUpdateProject`, `useDeleteProject`, `useProjectDashboard`, `useProjectActivities`)
 
-- [ ] **업무일지 API 연동**
-  - `apps/web/app/worklogs/page.tsx` - Mock 데이터 제거
-  - TanStack Query 훅 생성 (`useWorklogs`, `useWorklog`, `useCreateWorklog` 등)
+- [x] **업무일지 API 연동**
+  - ✅ `apps/web/app/worklogs/page.tsx` - TanStack Query 훅으로 마이그레이션
+  - ✅ TanStack Query 훅 생성 (`useWorklogs`, `useInfiniteWorklogs`, `useWorklog`, `useCreateWorklog`, `useUpdateWorklog`, `useDeleteWorklog`)
 
-- [ ] **대시보드 API 연동**
-  - `apps/web/app/dashboard/page.tsx` - 실제 통계 데이터 연동
-  - 차트 컴포넌트에 실제 데이터 전달
+- [x] **대시보드 API 연동**
+  - ✅ `apps/web/app/dashboard/page.tsx` - TanStack Query 훅으로 마이그레이션
+  - ✅ 차트 컴포넌트에 TanStack Query 훅 적용 (WeeklyActivity, ProjectDistribution, MonthlyTrend, RecentWorklogs)
+  - ✅ 대시보드 훅 생성 (`useDashboardStats`, `useWeeklyActivity`, `useProjectDistribution`, `useMonthlyTrend`, `useRecentWorklogs`)
 
 ### 1.2 인증 시스템 완성
 
 **현재 상태**: 로그인 폼만 있고 실제 인증 미구현  
 **목표**: 완전한 인증 플로우 구현
 
-- [ ] **로그인/회원가입 기능 완성**
-  - `apps/web/components/auth/login-form.tsx` - 실제 API 호출로 변경
-  - `apps/web/components/auth/register-form.tsx` - 회원가입 API 연동
-  - 로그인 성공 시 토큰 저장 및 리다이렉트
+- [x] **로그인/회원가입 기능 완성**
+  - ✅ `apps/web/components/auth/login-form.tsx` - TanStack Query useLogin 훅으로 변경
+  - ✅ `apps/web/hooks/use-auth.ts` - 인증 관련 훅 생성 (useLogin, useRegister, useLogout, useCurrentUser)
+  - ✅ 로그인 성공 시 토큰 저장 및 리다이렉트
 
 - [ ] **인증 미들웨어 구현**
   - `apps/web/middleware.ts` 생성
