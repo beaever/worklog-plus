@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authApi } from '@worklog-plus/api';
 import { useUserStore } from '@worklog-plus/store';
 import type { LoginRequest, RegisterRequest } from '@worklog-plus/types';
+import { setCookie, deleteCookie } from '@/lib/cookies';
 
 /**
  * 로그인 mutation 훅
@@ -33,12 +34,20 @@ export function useLogin() {
     onSuccess: (data) => {
       // 로그인 성공 시 토큰과 사용자 정보 저장
       if (data?.user && data?.accessToken && data?.refreshToken) {
+        // localStorage에 토큰 저장
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
+
+        // 쿠키에도 토큰 저장 (미들웨어에서 인증 상태 확인용)
+        setCookie('accessToken', data.accessToken, { days: 7 });
+        setCookie('refreshToken', data.refreshToken, { days: 30 });
+
+        // Zustand store 업데이트
         login(data.user, {
           accessToken: data.accessToken,
           refreshToken: data.refreshToken,
         });
+
         router.push('/dashboard');
       }
     },
@@ -71,12 +80,20 @@ export function useRegister() {
     onSuccess: (data) => {
       // 회원가입 성공 시 자동 로그인 처리
       if (data?.user && data?.accessToken && data?.refreshToken) {
+        // localStorage에 토큰 저장
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
+
+        // 쿠키에도 토큰 저장 (미들웨어에서 인증 상태 확인용)
+        setCookie('accessToken', data.accessToken, { days: 7 });
+        setCookie('refreshToken', data.refreshToken, { days: 30 });
+
+        // Zustand store 업데이트
         login(data.user, {
           accessToken: data.accessToken,
           refreshToken: data.refreshToken,
         });
+
         router.push('/dashboard');
       }
     },
@@ -111,9 +128,17 @@ export function useLogout() {
       // 로그아웃 성공 시 모든 인증 정보 제거
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+
+      // 쿠키에서도 토큰 삭제
+      deleteCookie('accessToken');
+      deleteCookie('refreshToken');
+
+      // Zustand store 초기화
       logout();
+
       // 모든 쿼리 캐시 초기화
       queryClient.clear();
+
       router.push('/login');
     },
   });
