@@ -25,8 +25,10 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Build Storybook
-        run: pnpm build --filter=@worklog-plus/storybook
+      - name: Build Storybook and dependencies
+        run: pnpm build --filter=@worklog-plus/storybook...
+        env:
+          NODE_ENV: production
 
       - name: Publish to Chromatic
         uses: chromaui/action@latest
