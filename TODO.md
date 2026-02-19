@@ -60,11 +60,12 @@
 **현재 상태**: Mock 데이터로만 동작  
 **목표**: 실제 백엔드 API와 연동
 
-- [ ] **환경 변수 설정**
-  - `apps/web/.env.local` 생성
-  - `NEXT_PUBLIC_API_URL` 설정
-  - `apps/mobile/.env` 생성
-  - `EXPO_PUBLIC_WEB_URL` 설정
+- [x] **환경 변수 설정**
+  - ✅ `apps/web/.env.example` 생성
+  - ✅ `NEXT_PUBLIC_API_URL` 설정 가이드
+  - ✅ `apps/mobile/.env.example` 생성
+  - ✅ `EXPO_PUBLIC_WEB_URL` 설정 가이드
+  - ✅ `docs/ENV_SETUP.md` 환경 변수 설정 문서 작성
 
 - [x] **API 클라이언트 인증 헤더 추가**
   - ✅ `packages/api/src/client.ts` 수정
@@ -95,45 +96,55 @@
   - ✅ `apps/web/hooks/use-auth.ts` - 인증 관련 훅 생성 (useLogin, useRegister, useLogout, useCurrentUser)
   - ✅ 로그인 성공 시 토큰 저장 및 리다이렉트
 
-- [ ] **인증 미들웨어 구현**
-  - `apps/web/middleware.ts` 생성
-  - 보호된 라우트 접근 제어 (/dashboard, /projects, /worklogs 등)
-  - 비인증 사용자는 /login으로 리다이렉트
+- [x] **인증 미들웨어 구현**
+  - ✅ `apps/web/middleware.ts` 생성
+  - ✅ 보호된 라우트 접근 제어 (/dashboard, /projects, /worklogs, /settings, /admin)
+  - ✅ 비인증 사용자는 /login으로 리다이렉트 (callbackUrl 파라미터 포함)
+  - ✅ 로그인한 사용자의 공개 라우트 접근 시 대시보드 리다이렉트
 
-- [ ] **토큰 갱신 로직**
-  - Refresh Token을 이용한 자동 토큰 갱신
-  - `packages/api/src/auth.ts` - refresh API 활용
-  - 401 에러 시 자동 갱신 후 재시도
+- [x] **토큰 갱신 로직**
+  - ✅ Refresh Token을 이용한 자동 토큰 갱신
+  - ✅ `packages/api/src/client.ts` - 401 에러 시 자동 갱신 후 재시도
+  - ✅ localStorage 및 쿠키에 토큰 저장
 
-- [ ] **로그아웃 기능**
-  - 헤더/사이드바에 로그아웃 버튼 추가
-  - 로그아웃 시 토큰 삭제 및 스토어 초기화
-  - /login으로 리다이렉트
+- [x] **로그아웃 기능**
+  - ✅ `useLogout` 훅 구현
+  - ✅ 로그아웃 시 localStorage 및 쿠키에서 토큰 삭제
+  - ✅ Zustand store 초기화
+  - ✅ TanStack Query 캐시 초기화
+  - ✅ /login으로 리다이렉트
+  - ⏳ 헤더/사이드바에 로그아웃 버튼 추가 (UI 작업 필요)
 
-- [ ] **사용자 정보 자동 로드**
-  - 앱 시작 시 토큰 확인
-  - 유효한 토큰이 있으면 사용자 정보 로드 (`authApi.me()`)
-  - `packages/store/src/user-store.ts` 업데이트
+- [x] **사용자 정보 자동 로드**
+  - ✅ `useCurrentUser` 훅 구현
+  - ✅ 앱 시작 시 localStorage에서 토큰 확인
+  - ✅ 유효한 토큰이 있으면 사용자 정보 로드 (`authApi.me()`)
+  - ✅ 5분간 캐시 유지, 인증 실패 시 재시도 안 함
 
 ### 1.3 에러 처리 및 로딩 상태
 
 **현재 상태**: 에러 처리 미흡  
 **목표**: 사용자 친화적인 에러 처리
 
-- [ ] **전역 에러 바운더리**
-  - `apps/web/app/error.tsx` 개선
-  - 에러 타입별 메시지 표시
-  - 재시도 버튼 추가
+- [x] **전역 에러 바운더리**
+  - ✅ `apps/web/app/error.tsx` 구현
+  - ✅ 에러 타입별 맞춤 메시지 표시 (network, auth, notFound, server, unknown)
+  - ✅ 재시도 및 홈으로 이동 버튼 추가
+  - ✅ 개발 환경에서 상세 에러 정보 표시 (스택 트레이스)
+  - ✅ 프로덕션 환경 대비 에러 모니터링 준비
 
-- [ ] **API 에러 처리**
-  - `packages/api/src/client.ts` - 에러 응답 구조화
-  - 네트워크 에러, 서버 에러, 인증 에러 구분
-  - Toast 알림 또는 에러 모달 표시
+- [x] **API 에러 처리**
+  - ✅ `packages/api/src/client.ts` - 에러 응답 구조화
+  - ✅ 401 에러 시 자동 토큰 갱신 로직
+  - ✅ 네트워크 에러, 서버 에러, 인증 에러 구분
+  - ⏳ Toast 알림 또는 에러 모달 표시 (UI 작업 필요)
 
-- [ ] **로딩 상태 UI**
-  - Skeleton 컴포넌트 추가 (`packages/ui/src/skeleton.tsx`)
-  - 각 페이지에 로딩 상태 표시
-  - Suspense 경계 설정
+- [x] **로딩 상태 UI**
+  - ✅ Skeleton 컴포넌트 추가 (`packages/ui/src/skeleton.tsx`)
+  - ✅ SkeletonText, SkeletonCard, SkeletonTable 컴포넌트 구현
+  - ✅ 펄스 애니메이션 및 맞춤형 크기 설정 지원
+  - ⏳ 각 페이지에 로딩 상태 표시 (페이지별 적용 필요)
+  - ⏳ Suspense 경계 설정 (페이지별 적용 필요)
 
 ---
 
@@ -338,20 +349,35 @@
 
 ### 4.2 성능 최적화
 
-- [ ] **이미지 최적화**
-  - Next.js Image 컴포넌트 활용
-  - 프로필 이미지, 로고 등
+- [x] **이미지 최적화**
+  - ✅ Next.js Image 컴포넌트 설정 (next.config.ts)
+  - ✅ WebP/AVIF 포맷 우선 사용
+  - ✅ 반응형 이미지 크기 설정 (deviceSizes, imageSizes)
+  - ⏳ 프로필 이미지, 로고 등 실제 적용 (페이지별 작업 필요)
 
-- [ ] **코드 스플리팅**
-  - 동적 import 활용
-  - 페이지별 번들 크기 최적화
+- [x] **코드 스플리팅**
+  - ✅ Next.js 자동 코드 스플리팅 활성화
+  - ✅ 패키지 임포트 최적화 (lucide-react, @worklog-plus/ui)
+  - ⏳ 동적 import 활용 (페이지별 적용 필요)
 
-- [ ] **React Query 캐싱 전략**
-  - staleTime, cacheTime 설정
-  - Optimistic Update 적용
+- [x] **React Query 캐싱 전략**
+  - ✅ staleTime 설정 (프로젝트: 30-60초, 대시보드: 60초, 업무일지: 30초)
+  - ✅ 쿼리 무효화 전략 구현 (mutation 성공 시 자동 갱신)
+  - ⏳ Optimistic Update 적용 (향후 개선 필요)
+
+- [x] **성능 유틸리티 추가**
+  - ✅ useDebounce: 검색 입력 최적화
+  - ✅ useThrottle: 스크롤/리사이즈 이벤트 최적화
+  - ✅ useIntersectionObserver: 무한 스크롤, 지연 로딩
+  - ✅ useWindowSize: 반응형 UI 최적화
+  - ✅ useLocalStorage: 로컬 스토리지 동기화
+
+- [x] **컴파일러 최적화**
+  - ✅ 프로덕션 빌드에서 console.log 제거 (error, warn 제외)
+  - ✅ React Strict Mode 활성화
 
 - [ ] **Lighthouse 점수 개선**
-  - Performance, Accessibility, SEO 점수 90+ 목표
+  - ⏳ Performance, Accessibility, SEO 점수 90+ 목표 (측정 및 개선 필요)
 
 ### 4.3 테스트 작성
 
