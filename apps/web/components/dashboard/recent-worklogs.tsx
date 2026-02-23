@@ -24,6 +24,21 @@ export function RecentWorklogs() {
     );
   }
 
+  if (!recentWorklogs || recentWorklogs.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>최근 업무일지</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className='flex h-32 items-center justify-center text-sm text-muted-foreground'>
+            최근 업무일지가 없습니다
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>

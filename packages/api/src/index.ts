@@ -106,3 +106,4 @@ export * from './auth';
 export * from './projects';
 export * from './worklogs';
 export * from './users';
+export * from './dashboard';

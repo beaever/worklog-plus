@@ -18,6 +18,7 @@ import {
   useUpdateProject,
   useDeleteProject,
 } from '@/hooks/use-projects';
+import { toast } from 'sonner';
 
 const statusConfig: Record<
   ProjectStatus,
@@ -74,6 +75,10 @@ export default function ProjectDetailPage() {
       {
         onSuccess: () => {
           setIsEditModalOpen(false);
+          toast.success('프로젝트가 수정되었습니다');
+        },
+        onError: (error) => {
+          toast.error(error.message || '프로젝트 수정에 실패했습니다');
         },
       },
     );
@@ -82,7 +87,11 @@ export default function ProjectDetailPage() {
   const handleDeleteProject = async () => {
     deleteProjectMutation.mutate(projectId, {
       onSuccess: () => {
+        toast.success('프로젝트가 삭제되었습니다');
         router.push('/projects');
+      },
+      onError: (error) => {
+        toast.error(error.message || '프로젝트 삭제에 실패했습니다');
       },
     });
   };

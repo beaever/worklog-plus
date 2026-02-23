@@ -138,8 +138,11 @@ export function useIntersectionObserver(
   useEffect(() => {
     if (!element) return;
 
-    const observer = new IntersectionObserver(([entry]) => {
-      setIsIntersecting(entry.isIntersecting);
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        setIsIntersecting(entry.isIntersecting);
+      }
     }, options);
 
     observer.observe(element);
@@ -227,7 +230,7 @@ export function useAsyncMemo<T>(
  * console.log(`Count changed from ${prevCount} to ${count}`);
  */
 export function usePrevious<T>(value: T): T | undefined {
-  const ref = useRef<T>();
+  const ref = useRef<T | undefined>(undefined);
 
   useEffect(() => {
     ref.current = value;

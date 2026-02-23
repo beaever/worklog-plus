@@ -2,6 +2,8 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
+import { ThemeProvider } from 'next-themes';
+import { Toaster } from 'sonner';
 import { AuthProvider } from './auth-provider';
 
 interface ProvidersProps {
@@ -23,7 +25,12 @@ export function Providers({ children }: ProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
+      <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+        <AuthProvider>
+          {children}
+          <Toaster position='top-center' richColors />
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

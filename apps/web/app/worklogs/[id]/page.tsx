@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Button, Badge, Card, CardHeader, CardContent } from '@worklog-plus/ui';
 import {
   ArrowLeft,
@@ -11,42 +11,18 @@ import {
   Clock,
   FolderOpen,
 } from 'lucide-react';
-import type { Worklog, WorklogCreateInput } from '@worklog-plus/types';
+import type { WorklogCreateInput } from '@worklog-plus/types';
 import { WorklogFormModal } from '@/components/worklog/worklog-form-modal';
 import { DeleteWorklogDialog } from '@/components/worklog/delete-worklog-dialog';
-
-// Mock data
-const mockWorklog: Worklog = {
-  id: '1',
-  projectId: '1',
-  userId: 'user-1',
-  title: 'API 인증 모듈 구현',
-  content: `## 작업 내용
-
-### 1. JWT 기반 인증 시스템 구현
-- 액세스 토큰 발급 로직 개발
-- 리프레시 토큰 발급 및 갱신 로직 개발
-- 토큰 만료 처리 미들웨어 구현
-
-### 2. 보안 강화
-- 비밀번호 해싱 (bcrypt)
-- Rate limiting 적용
-- CORS 설정
-
-### 3. 테스트
-- 단위 테스트 작성
-- 통합 테스트 작성`,
-  date: new Date().toISOString().slice(0, 10),
-  duration: 4,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
-
-const mockProjects = [
-  { id: '1', name: 'WorkLog+ 백엔드' },
-  { id: '2', name: 'WorkLog+ 프론트엔드' },
-  { id: '3', name: '모바일 앱 개발' },
-];
+import {
+  useWorklog,
+  useUpdateWorklog,
+  useDeleteWorklog,
+} from '@/hooks/use-worklogs';
+import { useProjects } from '@/hooks/use-projects';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { toast } from 'sonner';
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('ko-KR', {
@@ -76,24 +52,55 @@ function formatDateTime(dateString: string): string {
 
 export default function WorklogDetailPage() {
   const router = useRouter();
-  const [worklog, setWorklog] = useState<Worklog>(mockWorklog);
+  const params = useParams();
+  const worklogId = params.id as string;
+
+  const { data: worklog, isLoading: isLoadingWorklog } = useWorklog(worklogId);
+  const { data: projectsData } = useProjects({ limit: 100 });
+  const updateWorklogMutation = useUpdateWorklog();
+  const deleteWorklogMutation = useDeleteWorklog();
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+  const projects = projectsData?.data || [];
   const projectName =
-    mockProjects.find((p) => p.id === worklog.projectId)?.name ?? '알 수 없음';
+    projects.find((p) => p.id === worklog?.projectId)?.name ?? '알 수 없음';
 
   const handleUpdateWorklog = async (data: WorklogCreateInput) => {
-    setWorklog({
-      ...worklog,
-      ...data,
-      updatedAt: new Date().toISOString(),
-    });
+    updateWorklogMutation.mutate(
+      { id: worklogId, ...data },
+      {
+        onSuccess: () => {
+          setIsEditModalOpen(false);
+          toast.success('업무일지가 수정되었습니다');
+        },
+        onError: (error) => {
+          toast.error(error.message || '업무일지 수정에 실패했습니다');
+        },
+      },
+    );
   };
 
   const handleDeleteWorklog = async () => {
-    router.push('/worklogs');
+    deleteWorklogMutation.mutate(worklogId, {
+      onSuccess: () => {
+        toast.success('업무일지가 삭제되었습니다');
+        router.push('/worklogs');
+      },
+      onError: (error) => {
+        toast.error(error.message || '업무일지 삭제에 실패했습니다');
+      },
+    });
   };
+
+  if (isLoadingWorklog || !worklog) {
+    return (
+      <div className='flex min-h-[400px] items-center justify-center'>
+        <div className='h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent' />
+      </div>
+    );
+  }
 
   return (
     <div className='space-y-6'>
@@ -145,8 +152,10 @@ export default function WorklogDetailPage() {
           <h2 className='text-lg font-semibold'>업무 내용</h2>
         </CardHeader>
         <CardContent>
-          <div className='prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap'>
-            {worklog.content}
+          <div className='prose prose-sm dark:prose-invert max-w-none'>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {worklog.content}
+            </ReactMarkdown>
           </div>
         </CardContent>
       </Card>
@@ -171,7 +180,7 @@ export default function WorklogDetailPage() {
       <WorklogFormModal
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
-        projects={mockProjects}
+        projects={projects}
         worklog={worklog}
         onSubmit={handleUpdateWorklog}
       />
