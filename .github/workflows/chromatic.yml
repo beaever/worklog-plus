@@ -23,7 +23,14 @@ jobs:
           node-version: 20
           cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Generate Prisma Client
+        run: pnpm --filter=@worklog-plus/backend exec prisma generate
+
+      - name: Run typecheck
+        run: pnpm typecheck
 
       - name: Build Storybook and dependencies
         run: pnpm build --filter=@worklog-plus/storybook...

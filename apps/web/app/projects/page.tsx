@@ -8,6 +8,7 @@ import { ProjectCard } from '@/components/project/project-card';
 import { ProjectFilter } from '@/components/project/project-filter';
 import { ProjectFormModal } from '@/components/project/project-form-modal';
 import { useProjects, useCreateProject } from '@/hooks/use-projects';
+import { toast } from 'sonner';
 
 export default function ProjectsPage() {
   const [search, setSearch] = useState('');
@@ -49,6 +50,10 @@ export default function ProjectsPage() {
     createProjectMutation.mutate(data, {
       onSuccess: () => {
         setIsCreateModalOpen(false);
+        toast.success('프로젝트가 생성되었습니다');
+      },
+      onError: (error) => {
+        toast.error(error.message || '프로젝트 생성에 실패했습니다');
       },
     });
   };

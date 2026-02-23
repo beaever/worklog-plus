@@ -28,6 +28,21 @@ export function WeeklyActivityChart() {
     );
   }
 
+  if (!data || data.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>주간 활동</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className='flex h-[300px] items-center justify-center text-sm text-muted-foreground'>
+            데이터가 없습니다
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>

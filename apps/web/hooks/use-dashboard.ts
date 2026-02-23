@@ -1,37 +1,14 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-
-/** 대시보드 통계 데이터 타입 */
-interface DashboardStats {
-  totalProjects: number;
-  activeProjects: number;
-  weeklyWorklogs: number;
-  weeklyWorklogsChange: number;
-  totalHours: string;
-  totalHoursChange: number;
-  completedProjects: number;
-}
-
-/** 주간 활동 데이터 타입 */
-interface WeeklyActivity {
-  day: string;
-  worklogs: number;
-  hours: number;
-}
-
-/** 프로젝트 분포 데이터 타입 */
-interface ProjectDistribution {
-  name: string;
-  value: number;
-}
-
-/** 월별 추이 데이터 타입 */
-interface MonthlyTrend {
-  month: string;
-  worklogs: number;
-  hours: number;
-}
+import { dashboardApi } from '@worklog-plus/api';
+import type {
+  DashboardStats,
+  WeeklyActivity,
+  ProjectDistribution,
+  MonthlyTrend,
+  RecentWorklog,
+} from '@worklog-plus/api';
 
 /**
  * 대시보드 통계 조회 query 훅
@@ -49,15 +26,11 @@ export function useDashboardStats() {
   return useQuery<DashboardStats>({
     queryKey: ['dashboard', 'stats'],
     queryFn: async () => {
-      return {
-        totalProjects: 12,
-        activeProjects: 8,
-        weeklyWorklogs: 24,
-        weeklyWorklogsChange: 12,
-        totalHours: '156h',
-        totalHoursChange: 8,
-        completedProjects: 4,
-      };
+      const response = await dashboardApi.getStats();
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to fetch dashboard stats');
+      }
+      return response.data;
     },
     staleTime: 60 * 1000,
   });
@@ -80,12 +53,11 @@ export function useWeeklyActivity() {
   return useQuery<WeeklyActivity[]>({
     queryKey: ['dashboard', 'weekly-activity'],
     queryFn: async () => {
-      const days = ['월', '화', '수', '목', '금', '토', '일'];
-      return days.map((day) => ({
-        day,
-        worklogs: Math.floor(Math.random() * 10) + 1,
-        hours: Math.floor(Math.random() * 8) + 1,
-      }));
+      const response = await dashboardApi.getWeeklyActivity();
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to fetch weekly activity');
+      }
+      return response.data;
     },
     staleTime: 60 * 1000,
   });
@@ -108,13 +80,13 @@ export function useProjectDistribution() {
   return useQuery<ProjectDistribution[]>({
     queryKey: ['dashboard', 'project-distribution'],
     queryFn: async () => {
-      return [
-        { name: 'WorkLog+ 백엔드', value: 35 },
-        { name: 'WorkLog+ 프론트엔드', value: 28 },
-        { name: '모바일 앱', value: 18 },
-        { name: 'API 문서화', value: 12 },
-        { name: '기타', value: 7 },
-      ];
+      const response = await dashboardApi.getProjectDistribution();
+      if (!response.success || !response.data) {
+        throw new Error(
+          response.error || 'Failed to fetch project distribution',
+        );
+      }
+      return response.data;
     },
     staleTime: 60 * 1000,
   });
@@ -137,12 +109,11 @@ export function useMonthlyTrend() {
   return useQuery<MonthlyTrend[]>({
     queryKey: ['dashboard', 'monthly-trend'],
     queryFn: async () => {
-      const months = ['1월', '2월', '3월', '4월', '5월', '6월'];
-      return months.map((month) => ({
-        month,
-        worklogs: Math.floor(Math.random() * 50) + 20,
-        hours: Math.floor(Math.random() * 100) + 50,
-      }));
+      const response = await dashboardApi.getMonthlyTrend();
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to fetch monthly trend');
+      }
+      return response.data;
     },
     staleTime: 60 * 1000,
   });
@@ -162,32 +133,14 @@ export function useMonthlyTrend() {
  * const { data: recentWorklogs } = useRecentWorklogs();
  */
 export function useRecentWorklogs() {
-  return useQuery({
+  return useQuery<RecentWorklog[]>({
     queryKey: ['dashboard', 'recent-worklogs'],
     queryFn: async () => {
-      return [
-        {
-          id: '1',
-          title: 'API 인증 모듈 구현',
-          projectName: 'WorkLog+ 백엔드',
-          date: new Date().toISOString().slice(0, 10),
-          duration: 4,
-        },
-        {
-          id: '2',
-          title: '데이터베이스 스키마 설계',
-          projectName: 'WorkLog+ 백엔드',
-          date: new Date(Date.now() - 86400000).toISOString().slice(0, 10),
-          duration: 3,
-        },
-        {
-          id: '3',
-          title: '프론트엔드 컴포넌트 개발',
-          projectName: 'WorkLog+ 프론트엔드',
-          date: new Date(Date.now() - 172800000).toISOString().slice(0, 10),
-          duration: 5,
-        },
-      ];
+      const response = await dashboardApi.getRecentWorklogs();
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to fetch recent worklogs');
+      }
+      return response.data;
     },
     staleTime: 30 * 1000,
   });
