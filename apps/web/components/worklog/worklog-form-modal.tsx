@@ -20,20 +20,13 @@ interface Project {
   name: string;
 }
 
-type WorklogFormModalProps = {
+interface WorklogFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   projects: Project[];
-} & (
-  | {
-      worklog?: undefined;
-      onSubmit: (data: WorklogCreateInput) => Promise<void>;
-    }
-  | {
-      worklog: Worklog;
-      onSubmit: (data: WorklogCreateInput) => Promise<void>;
-    }
-);
+  worklog?: Worklog;
+  onSubmit: (data: WorklogCreateInput) => Promise<void>;
+}
 
 export function WorklogFormModal({
   open,

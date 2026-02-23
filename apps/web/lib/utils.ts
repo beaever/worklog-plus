@@ -1,21 +1,19 @@
 /**
  * UUID v4 생성 함수
- * crypto.randomUUID()가 지원되지 않는 환경(비보안 컨텍스트)에서도 동작
+ * 1순위: crypto.randomUUID() (가장 안전하고 표준)
+ * 2순위: crypto.getRandomValues() (암호학적으로 안전)
+ * 3순위: Math.random() (최후의 폴백, 보안에 민감하지 않은 경우만)
  */
 export function generateUUID(): string {
-  // crypto.randomUUID()가 지원되면 사용 (secure context에서만 가능)
+  // 1순위: crypto.randomUUID() 사용
   if (
     typeof crypto !== 'undefined' &&
     typeof crypto.randomUUID === 'function'
   ) {
-    try {
-      return crypto.randomUUID();
-    } catch {
-      // secure context가 아닌 경우 폴백
-    }
+    return crypto.randomUUID();
   }
 
-  // 폴백: crypto.getRandomValues() 사용 (더 넓은 환경에서 지원)
+  // 2순위: crypto.getRandomValues를 사용한 UUID v4 생성
   if (
     typeof crypto !== 'undefined' &&
     typeof crypto.getRandomValues === 'function'
@@ -38,7 +36,8 @@ export function generateUUID(): string {
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
   }
 
-  // 최후의 폴백: Math.random() 사용 (보안에 민감하지 않은 경우)
+  // 3순위 (최후의 폴백): Math.random() 사용
+  // 주의: 암호학적으로 안전하지 않으므로 보안에 민감한 용도로는 사용 금지
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
