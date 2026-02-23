@@ -1,60 +1,32 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Input } from '@worklog-plus/ui';
+import { loginSchema, type LoginFormData } from '@worklog-plus/types';
 import { useLogin } from '@/hooks/use-auth';
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LoginForm() {
   const loginMutation = useLogin();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
-  const validateForm = (): string | null => {
-    if (!email.trim()) {
-      return '이메일을 입력해주세요.';
-    }
-    if (!EMAIL_REGEX.test(email)) {
-      return '올바른 이메일 형식이 아닙니다.';
-    }
-    if (!password) {
-      return '비밀번호를 입력해주세요.';
-    }
-    if (password.length < 4) {
-      return '비밀번호는 4자 이상이어야 합니다.';
-    }
-    return null;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    loginMutation.mutate(
-      { email, password },
-      {
-        onError: (err) => {
-          setError(err.message || '로그인에 실패했습니다.');
-        },
-      },
-    );
+  const onSubmit = (data: LoginFormData) => {
+    loginMutation.mutate(data);
   };
 
   return (
-    <form onSubmit={handleSubmit} className='space-y-4'>
-      {error && (
+    <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+      {loginMutation.error && (
         <div className='rounded-md bg-red-50 p-3 text-sm text-red-600'>
-          {error}
+          {loginMutation.error.message || '로그인에 실패했습니다.'}
         </div>
       )}
 
@@ -66,11 +38,12 @@ export function LoginForm() {
           id='email'
           type='email'
           placeholder='name@example.com'
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          {...register('email')}
           disabled={loginMutation.isPending}
         />
+        {errors.email && (
+          <p className='text-sm text-red-600'>{errors.email.message}</p>
+        )}
       </div>
 
       <div className='space-y-2'>
@@ -80,11 +53,12 @@ export function LoginForm() {
         <Input
           id='password'
           type='password'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          {...register('password')}
           disabled={loginMutation.isPending}
         />
+        {errors.password && (
+          <p className='text-sm text-red-600'>{errors.password.message}</p>
+        )}
       </div>
 
       <Button

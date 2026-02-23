@@ -14,5 +14,8 @@
   "devDependencies": {
     "@worklog-plus/config": "workspace:*",
     "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
   }
 }
