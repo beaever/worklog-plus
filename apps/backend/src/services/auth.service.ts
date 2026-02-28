@@ -1,13 +1,3 @@
-/**
- * 인증 서비스
- *
- * @description
- * - 회원가입, 로그인, 로그아웃 비즈니스 로직
- * - JWT 토큰 생성 및 검증
- * - Refresh Token 관리
- */
-
-import { PrismaClient } from '@prisma/client';
 import type { User } from '@prisma/client';
 import { hashPassword, verifyPassword } from '../utils/password';
 import {
@@ -16,8 +6,7 @@ import {
   verifyRefreshToken,
 } from '../utils/jwt';
 import { AppError } from '../middleware/error';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
 
 /**
  * 인증 응답 인터페이스
