@@ -1,20 +1,24 @@
 /**
  * 인증 컨트롤러
- * 
+ *
  * @description
  * - HTTP 요청/응답 처리
  * - 서비스 계층 호출
  * - 에러 처리
  */
 
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import * as authService from '../services/auth.service';
-import { RegisterInput, LoginInput, RefreshTokenInput } from '../schemas/auth.schema';
-import { AuthRequest } from '../middleware/auth';
+import type {
+  LoginInput,
+  RegisterInput,
+  RefreshTokenInput,
+} from '../schemas/auth.schema';
+import type { AuthRequest } from '../middleware/auth';
 
 /**
  * 회원가입
- * 
+ *
  * POST /api/auth/register
  */
 export const register = async (
@@ -38,7 +42,7 @@ export const register = async (
 
 /**
  * 로그인
- * 
+ *
  * POST /api/auth/login
  */
 export const login = async (
@@ -62,7 +66,7 @@ export const login = async (
 
 /**
  * 로그아웃
- * 
+ *
  * POST /api/auth/logout
  */
 export const logout = async (
@@ -88,7 +92,7 @@ export const logout = async (
 
 /**
  * 토큰 갱신
- * 
+ *
  * POST /api/auth/refresh
  */
 export const refreshToken = async (
@@ -112,7 +116,7 @@ export const refreshToken = async (
 
 /**
  * 현재 사용자 정보 조회
- * 
+ *
  * GET /api/auth/me
  */
 export const getCurrentUser = async (
@@ -128,7 +132,7 @@ export const getCurrentUser = async (
     const user = await authService.getCurrentUser(req.user.userId);
 
     // 비밀번호 해시 제거
-    const { passwordHash, ...userWithoutPassword } = user;
+    const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
 
     res.status(200).json({
       success: true,

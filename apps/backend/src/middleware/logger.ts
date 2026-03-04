@@ -6,7 +6,7 @@
  * - 요청 메서드, 경로, 상태 코드, 응답 시간을 기록합니다
  */
 
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import * as logger from '../utils/logger';
 
 /**
