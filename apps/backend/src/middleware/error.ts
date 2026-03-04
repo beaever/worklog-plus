@@ -7,7 +7,7 @@
  * - 에러 로깅
  */
 
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import * as logger from '../utils/logger';
 import { env } from '../config/env';
 
@@ -37,7 +37,7 @@ export class AppError extends Error {
 interface ErrorResponse {
   success: false;
   error: string;
-  details?: any;
+  details?: unknown;
   stack?: string;
 }
 
@@ -52,21 +52,23 @@ interface ErrorResponse {
  * @returns {object} 상태 코드와 메시지
  */
 const handlePrismaError = (
-  error: any,
+  error: unknown,
 ): { statusCode: number; message: string } => {
-  if (
-    error.code &&
-    typeof error.code === 'string' &&
-    error.code.startsWith('P')
-  ) {
-    switch (error.code) {
-      case 'P2002':
+  const err = error as {
+    code?: string;
+    meta?: { target?: string[] };
+    name?: string;
+  };
+  if (err.code && typeof err.code === 'string' && err.code.startsWith('P')) {
+    switch (err.code) {
+      case 'P2002': {
         // Unique constraint 위반
-        const field = error.meta?.target as string[] | undefined;
+        const field = err.meta?.target;
         return {
           statusCode: 409,
           message: `이미 존재하는 ${field ? field.join(', ') : '값'}입니다`,
         };
+      }
 
       case 'P2025':
         // 레코드를 찾을 수 없음
@@ -97,7 +99,7 @@ const handlePrismaError = (
     }
   }
 
-  if (error.name === 'PrismaClientValidationError') {
+  if (err.name === 'PrismaClientValidationError') {
     return {
       statusCode: 400,
       message: '잘못된 데이터 형식입니다',
@@ -128,14 +130,14 @@ const handlePrismaError = (
  * app.use(errorHandler);
  */
 export const errorHandler = (
-  err: any,
+  err: unknown,
   req: Request,
   res: Response,
   _next: NextFunction,
 ): void => {
   let statusCode = 500;
   let message = '서버 내부 오류가 발생했습니다';
-  let details: any = undefined;
+  let details: unknown = undefined;
 
   // ============================================
   // 1. AppError (커스텀 에러)
@@ -148,9 +150,19 @@ export const errorHandler = (
   // ============================================
   // 2. Prisma 에러
   // ============================================
-  else if (
-    (err.code && typeof err.code === 'string' && err.code.startsWith('P')) ||
-    err.name === 'PrismaClientValidationError'
+  const errObj = err as {
+    code?: string;
+    name?: string;
+    errors?: unknown;
+    issues?: unknown;
+    message?: string;
+    stack?: string;
+  };
+  if (
+    (errObj.code &&
+      typeof errObj.code === 'string' &&
+      errObj.code.startsWith('P')) ||
+    errObj.name === 'PrismaClientValidationError'
   ) {
     const prismaError = handlePrismaError(err);
     statusCode = prismaError.statusCode;
@@ -160,19 +172,19 @@ export const errorHandler = (
   // ============================================
   // 3. Validation 에러 (Zod 등)
   // ============================================
-  else if (err.name === 'ValidationError' || err.name === 'ZodError') {
+  else if (errObj.name === 'ValidationError' || errObj.name === 'ZodError') {
     statusCode = 400;
     message = '입력 데이터가 유효하지 않습니다';
-    details = err.errors || err.issues;
+    details = errObj.errors || errObj.issues;
   }
 
   // ============================================
   // 4. JWT 에러
   // ============================================
-  else if (err.name === 'JsonWebTokenError') {
+  else if (errObj.name === 'JsonWebTokenError') {
     statusCode = 401;
     message = '유효하지 않은 토큰입니다';
-  } else if (err.name === 'TokenExpiredError') {
+  } else if (errObj.name === 'TokenExpiredError') {
     statusCode = 401;
     message = '토큰이 만료되었습니다';
   }
@@ -192,9 +204,9 @@ export const errorHandler = (
     path: req.path,
     statusCode,
     message,
-    error: err.message,
-    stack: err.stack,
-    user: (req as any).user?.userId,
+    error: errObj.message,
+    stack: errObj.stack,
+    user: (req as { user?: { userId?: string } }).user?.userId,
   });
 
   // ============================================
@@ -210,8 +222,8 @@ export const errorHandler = (
     if (details) {
       errorResponse.details = details;
     }
-    if (err.stack) {
-      errorResponse.stack = err.stack;
+    if (errObj.stack) {
+      errorResponse.stack = errObj.stack;
     }
   }
 
@@ -265,7 +277,9 @@ export const notFoundHandler = (req: Request, res: Response): void => {
  *   res.json({ success: true, data: user });
  * }));
  */
-export const asyncHandler = (fn: Function) => {
+export const asyncHandler = (
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<void>,
+) => {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };

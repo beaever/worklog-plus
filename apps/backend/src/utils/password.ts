@@ -47,7 +47,7 @@ export const hashPassword = async (password: string): Promise<string> => {
   try {
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     return hash;
-  } catch (error) {
+  } catch {
     throw new Error('비밀번호 해싱 실패');
   }
 };
@@ -84,7 +84,7 @@ export const comparePassword = async (
   try {
     const isMatch = await bcrypt.compare(password, hash);
     return isMatch;
-  } catch (error) {
+  } catch {
     // 비교 실패 시 false 반환 (보안상 에러를 노출하지 않음)
     return false;
   }

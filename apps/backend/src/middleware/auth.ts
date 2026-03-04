@@ -7,8 +7,8 @@
  * - 역할 기반 권한 검증
  */
 
-import { Request, Response, NextFunction } from 'express';
-import { verifyAccessToken, JwtPayload } from '../utils/jwt';
+import type { Request, Response, NextFunction } from 'express';
+import { verifyAccessToken, type JwtPayload } from '../utils/jwt';
 
 /**
  * 인증된 요청 인터페이스
@@ -185,7 +185,7 @@ export const optionalAuthenticate = (
     req.user = payload;
 
     next();
-  } catch (error) {
+  } catch {
     // 토큰 검증 실패해도 진행 (선택적이므로)
     next();
   }

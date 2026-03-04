@@ -6,8 +6,8 @@
  * - body, query, params 검증 지원
  */
 
-import { Request, Response, NextFunction } from 'express';
-import { z, ZodSchema } from 'zod';
+import type { Request, Response, NextFunction } from 'express';
+import { z, type ZodSchema } from 'zod';
 
 /**
  * 요청 본문 검증 미들웨어
@@ -78,7 +78,7 @@ export const validateQuery = (schema: ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
       const validated = schema.parse(req.query);
-      req.query = validated as any;
+      req.query = validated as typeof req.query;
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -119,7 +119,7 @@ export const validateParams = (schema: ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
       const validated = schema.parse(req.params);
-      req.params = validated as any;
+      req.params = validated as typeof req.params;
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {

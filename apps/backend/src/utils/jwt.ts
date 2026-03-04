@@ -166,7 +166,7 @@ export const decodeToken = (token: string): JwtPayload | null => {
   try {
     const decoded = jwt.decode(token) as JwtPayload;
     return decoded;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
