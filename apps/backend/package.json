@@ -16,7 +16,9 @@
     "db:seed": "prisma db seed",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/ --ext .ts",
-    "test": "echo \"테스트 추가 예정\" && exit 0"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@prisma/client": "^5.8.0",
@@ -41,7 +43,9 @@
     "nodemon": "^3.0.2",
     "prisma": "^5.8.0",
     "tsx": "^4.7.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "@vitest/coverage-v8": "^2.1.8"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
