@@ -1,0 +1,58 @@
+name: Auto Label and Assignee
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  auto-label-assignee:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Extract branch prefix and set label
+        id: extract
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          PREFIX=$(echo "$BRANCH_NAME" | cut -d'/' -f1)
+          echo "prefix=$PREFIX" >> $GITHUB_OUTPUT
+          echo "Branch: $BRANCH_NAME, Prefix: $PREFIX"
+
+      - name: Add label based on branch prefix
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prefix = '${{ steps.extract.outputs.prefix }}';
+            const validLabels = ['fix', 'feature', 'hotfix', 'refactor', 'chore', 'docs', 'test', 'style'];
+
+            if (validLabels.includes(prefix)) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: [prefix]
+              });
+              console.log(`Added label: ${prefix}`);
+            } else {
+              console.log(`Prefix "${prefix}" is not in valid labels list. Skipping label.`);
+            }
+
+      - name: Add assignee (PR author)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prAuthor = context.payload.pull_request.user.login;
+
+            try {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                assignees: [prAuthor]
+              });
+              console.log(`✅ Added assignee: ${prAuthor}`);
+            } catch (error) {
+              console.log(`⚠️ Could not add assignee: ${error.message}`);
+            }
