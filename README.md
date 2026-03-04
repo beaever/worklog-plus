@@ -73,17 +73,17 @@
 ```
 worklog-plus/
 ├── apps/
-│   ├── web/              # Next.js 웹 서비스
-│   ├── mobile/           # React Native 모바일 앱
+│   ├── web/              # Next.js 15 웹 애플리케이션
+│   ├── mobile/           # React Native + Expo 모바일 앱
 │   ├── backend/          # Express API 서버
-│   └── storybook/        # Storybook 문서화
+│   └── storybook/        # UI 컴포넌트 문서화
 │
 ├── packages/
-│   ├── ui/               # 공용 UI 컴포넌트 (shadcn/ui)
-│   ├── components/       # 도메인 컴포넌트
+│   ├── ui/               # shadcn/ui 기반 공용 컴포넌트
+│   ├── components/       # 도메인 컴포넌트 (프로젝트, 업무일지 등)
+│   ├── api/              # 타입 안전한 API 클라이언트
+│   ├── store/            # Zustand 전역 상태
 │   ├── hooks/            # 공용 커스텀 훅
-│   ├── api/              # API 클라이언트
-│   ├── store/            # Zustand 상태 관리
 │   ├── types/            # 공용 타입 + Zod 스키마
 │   └── config/           # ESLint, TypeScript 설정
 │
@@ -92,6 +92,23 @@ worklog-plus/
 ├── pnpm-workspace.yaml
 └── package.json
 ```
+
+### 의존성 그래프
+
+프로젝트의 패키지 간 의존성 관계를 시각화하려면:
+
+```bash
+pnpm graph
+```
+
+이 명령어는 `graph.html` 파일을 생성하며, 브라우저에서 열어 Turborepo 태스크 의존성을 확인할 수 있습니다.
+
+**주요 의존성 규칙:**
+
+- `apps` → `packages` (단방향)
+- `packages` 간 순환 의존 금지
+- `ui`, `api`, `store`, `components` → `types`
+- `hooks` → 독립적 (의존성 없음)
 
 ---
 

@@ -9,17 +9,17 @@ describe('Pagination Utils', () => {
   describe('getPaginationParams', () => {
     it('올바른 skip과 take 값을 계산해야 함', () => {
       const result = getPaginationParams(1, 10);
-      expect(result).toEqual({ skip: 0, take: 10 });
+      expect(result).toEqual({ skip: 0, take: 10, page: 1, limit: 10 });
     });
 
     it('2페이지의 skip과 take 값을 계산해야 함', () => {
       const result = getPaginationParams(2, 10);
-      expect(result).toEqual({ skip: 10, take: 10 });
+      expect(result).toEqual({ skip: 10, take: 10, page: 2, limit: 10 });
     });
 
     it('기본값을 사용해야 함', () => {
       const result = getPaginationParams();
-      expect(result).toEqual({ skip: 0, take: 20 });
+      expect(result).toEqual({ skip: 0, take: 10, page: 1, limit: 10 });
     });
   });
 
@@ -62,14 +62,14 @@ describe('Pagination Utils', () => {
       const query = {};
       const result = extractPaginationFromQuery(query);
 
-      expect(result).toEqual({ page: 1, limit: 20 });
+      expect(result).toEqual({ page: 1, limit: 10 });
     });
 
     it('잘못된 값에 대해 기본값을 사용해야 함', () => {
       const query = { page: 'invalid', limit: 'invalid' };
       const result = extractPaginationFromQuery(query);
 
-      expect(result).toEqual({ page: 1, limit: 20 });
+      expect(result).toEqual({ page: 1, limit: 10 });
     });
   });
 });
