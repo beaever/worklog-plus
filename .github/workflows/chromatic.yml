@@ -32,6 +32,9 @@ jobs:
       - name: Run typecheck
         run: pnpm typecheck
 
+      - name: Run lint
+        run: pnpm lint
+
       - name: Build Storybook and dependencies
         run: pnpm build --filter=@worklog-plus/storybook...
         env:
@@ -44,3 +47,4 @@ jobs:
           storybookBuildDir: apps/storybook/storybook-static
           onlyChanged: true
           exitZeroOnChanges: true
+          autoAcceptChanges: main
