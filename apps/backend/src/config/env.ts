@@ -1,6 +1,6 @@
 /**
  * 환경 변수 관리 모듈
- * 
+ *
  * @description
  * - .env 파일에서 환경 변수를 로드하고 검증합니다
  * - 타입 안전한 환경 변수 접근을 제공합니다
@@ -8,10 +8,14 @@
  */
 
 import dotenv from 'dotenv';
+import path from 'path';
 import { z } from 'zod';
 
-// .env 파일 로드
-dotenv.config();
+// .env 파일 로드 (로컬 개발 환경용)
+// Railway 같은 프로덕션 환경에서는 시스템 환경변수를 사용
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+}
 
 /**
  * 환경 변수 스키마 정의
@@ -22,14 +26,20 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, '데이터베이스 URL이 필요합니다'),
 
   // JWT 시크릿
-  JWT_ACCESS_SECRET: z.string().min(32, 'JWT Access Secret은 최소 32자 이상이어야 합니다'),
-  JWT_REFRESH_SECRET: z.string().min(32, 'JWT Refresh Secret은 최소 32자 이상이어야 합니다'),
+  JWT_ACCESS_SECRET: z
+    .string()
+    .min(32, 'JWT Access Secret은 최소 32자 이상이어야 합니다'),
+  JWT_REFRESH_SECRET: z
+    .string()
+    .min(32, 'JWT Refresh Secret은 최소 32자 이상이어야 합니다'),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
 
   // 서버 설정
   PORT: z.string().default('8080'),
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
 
   // CORS
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
@@ -40,7 +50,7 @@ const envSchema = z.object({
 
 /**
  * 환경 변수 검증 및 파싱
- * 
+ *
  * @throws {Error} 필수 환경 변수가 없거나 형식이 잘못된 경우
  */
 const parseEnv = () => {
@@ -62,7 +72,9 @@ const parseEnv = () => {
       error.errors.forEach((err) => {
         console.error(`  - ${err.path.join('.')}: ${err.message}`);
       });
-      throw new Error('환경 변수 설정을 확인해주세요. .env.example 파일을 참고하세요.');
+      throw new Error(
+        '환경 변수 설정을 확인해주세요. .env.example 파일을 참고하세요.',
+      );
     }
     throw error;
   }
@@ -70,7 +82,7 @@ const parseEnv = () => {
 
 /**
  * 검증된 환경 변수
- * 
+ *
  * @example
  * import { env } from './config/env';
  * console.log(env.PORT); // '8080'
