@@ -41,10 +41,14 @@ const createApp = (): Application => {
   app.use('/api', routes);
 
   app.use((req: Request, res: Response) => {
+    console.log(
+      `⚠️  404 에러 - 경로: ${req.method} ${req.path}, Origin: ${req.get('origin')}`,
+    );
     res.status(404).json({
       success: false,
       error: '요청하신 리소스를 찾을 수 없습니다',
       path: req.path,
+      method: req.method,
     });
   });
 

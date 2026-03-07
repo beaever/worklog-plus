@@ -11,17 +11,20 @@ const startServer = async () => {
     const app = createApp();
     const PORT = parseInt(env.PORT, 10);
 
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT, '0.0.0.0', () => {
       console.log('');
       console.log('🚀 WorkLog+ API 서버 시작');
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log(`📍 서버 주소: http://localhost:${PORT}`);
+      console.log(`📍 서버 주소: http://0.0.0.0:${PORT}`);
       console.log(`🌍 환경: ${env.NODE_ENV}`);
       console.log(`🔐 CORS 허용: ${env.CORS_ORIGIN}`);
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log('');
       console.log('💡 사용 가능한 엔드포인트:');
-      console.log(`  - GET  http://localhost:${PORT}/health (헬스 체크)`);
+      console.log(`  - GET  /health (헬스 체크)`);
+      console.log(`  - POST /api/auth/register (회원가입)`);
+      console.log(`  - POST /api/auth/login (로그인)`);
+      console.log(`  - POST /api/auth/refresh (토큰 갱신)`);
       console.log('');
     });
 
