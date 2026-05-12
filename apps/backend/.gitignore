@@ -38,5 +38,5 @@ Thumbs.db
 coverage/
 .nyc_output/
 
-# Prisma
-prisma/migrations/**/migration.sql
+# Prisma (migration SQL은 버전 관리 대상)
+
