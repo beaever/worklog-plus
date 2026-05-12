@@ -70,16 +70,18 @@ export const login = async (
  * POST /api/auth/logout
  */
 export const logout = async (
-  req: Request<object, object, { refreshToken?: string }>,
+  req: AuthRequest,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.body as { refreshToken?: string };
+    const userId = req.user?.userId;
 
-    if (refreshToken) {
-      await authService.logout(refreshToken);
-    }
+    await authService.logout({
+      ...(refreshToken !== undefined && { refreshToken }),
+      ...(userId !== undefined && { userId }),
+    });
 
     res.status(200).json({
       success: true,

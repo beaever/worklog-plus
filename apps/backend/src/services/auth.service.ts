@@ -147,13 +147,27 @@ export const login = async (
 /**
  * 로그아웃
  *
- * @param refreshToken - Refresh Token
+ * refreshToken이 있으면 해당 토큰만 삭제, userId가 있으면 해당 사용자의 모든 만료 토큰 삭제
  */
-export const logout = async (refreshToken: string): Promise<void> => {
-  // Refresh Token 삭제
-  await prisma.refreshToken.deleteMany({
-    where: { token: refreshToken },
-  });
+export const logout = async ({
+  refreshToken,
+  userId,
+}: {
+  refreshToken?: string;
+  userId?: string;
+}): Promise<void> => {
+  if (refreshToken) {
+    await prisma.refreshToken.deleteMany({
+      where: { token: refreshToken },
+    });
+    return;
+  }
+
+  if (userId) {
+    await prisma.refreshToken.deleteMany({
+      where: { userId },
+    });
+  }
 };
 
 /**

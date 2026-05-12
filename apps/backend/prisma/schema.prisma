@@ -157,7 +157,7 @@ model RefreshToken {
 model ActivityLog {
   id          String   @id @default(uuid())
   projectId   String?  @map("project_id")
-  userId      String   @map("user_id")
+  userId      String?  @map("user_id")
   action      String // 'created_project', 'updated_worklog', etc.
   description String
   metadata    Json? // 추가 정보 (JSON 형태)
@@ -165,7 +165,7 @@ model ActivityLog {
 
   // 관계 (Relations)
   project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user    User     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   // 인덱스
   @@index([projectId])
@@ -183,7 +183,7 @@ model ActivityLog {
 model AuditLog {
   id         String   @id @default(uuid())
   action     String // USER_CREATED, PROJECT_DELETED, etc.
-  actorId    String   @map("actor_id")
+  actorId    String?  @map("actor_id")
   targetType String?  @map("target_type") // USER, PROJECT, ROLE, SYSTEM
   targetId   String?  @map("target_id")
   targetName String?  @map("target_name")
@@ -191,7 +191,7 @@ model AuditLog {
   createdAt  DateTime @default(now()) @map("created_at")
 
   // 관계 (Relations)
-  actor User @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
 
   // 인덱스
   @@index([actorId])

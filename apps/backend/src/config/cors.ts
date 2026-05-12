@@ -71,8 +71,8 @@ export const corsOptions: CorsOptions = {
     'Accept',
   ],
 
-  // Preflight 요청 캐시 시간 (24시간)
-  maxAge: 86400,
+  // Preflight 요청 캐시 시간 (1시간)
+  maxAge: 3600,
 };
 
 /**
