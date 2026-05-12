@@ -3,6 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "packageManager": "pnpm@9.15.0",
+  "description": "Worklog+ - Work Log Management Platform",
+  "homepage": "https://worklog-plus.vercel.app/",
   "scripts": {
     "dev": "turbo dev",
     "dev:web": "turbo dev --filter=@worklog-plus/web",

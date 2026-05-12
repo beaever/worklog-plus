@@ -74,8 +74,9 @@ export function useInfiniteWorklogs(projectId?: string) {
     },
     getNextPageParam: (lastPage) => {
       if (!lastPage) return undefined;
-      const hasMore = lastPage.page < lastPage.totalPages;
-      return hasMore ? lastPage.page + 1 : undefined;
+      const meta = (lastPage as { meta?: { page: number; totalPages: number } }).meta;
+      if (!meta) return undefined;
+      return meta.page < meta.totalPages ? meta.page + 1 : undefined;
     },
     initialPageParam: 1,
     staleTime: 30 * 1000,
