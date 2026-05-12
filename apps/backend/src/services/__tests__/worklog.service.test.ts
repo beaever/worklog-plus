@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AppError } from '../../middleware/error';
 
 vi.mock('../../lib/prisma', () => ({
   prisma: {
