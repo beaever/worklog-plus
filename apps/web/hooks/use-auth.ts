@@ -6,7 +6,7 @@ import { authApi } from '@worklog-plus/api';
 import { useUserStore } from '@worklog-plus/store';
 import type { LoginRequest, RegisterRequest } from '@worklog-plus/types';
 
-export function useLogin() {
+export function useLogin(options?: { redirectTo?: string }) {
   const router = useRouter();
   const login = useUserStore((state) => state.login);
 
@@ -21,7 +21,7 @@ export function useLogin() {
     onSuccess: (data) => {
       if (data?.user) {
         login(data.user);
-        router.push('/dashboard');
+        router.push(options?.redirectTo ?? '/dashboard');
       }
     },
   });
