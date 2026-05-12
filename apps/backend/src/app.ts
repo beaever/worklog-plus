@@ -41,14 +41,12 @@ const createApp = (): Application => {
   app.use('/api', routes);
 
   app.use((req: Request, res: Response) => {
-    console.log(
-      `⚠️  404 에러 - 경로: ${req.method} ${req.path}, Origin: ${req.get('origin')}`,
-    );
+    if (env.NODE_ENV === 'development') {
+      console.log(`⚠️  404: ${req.method} ${req.path}`);
+    }
     res.status(404).json({
       success: false,
       error: '요청하신 리소스를 찾을 수 없습니다',
-      path: req.path,
-      method: req.method,
     });
   });
 
