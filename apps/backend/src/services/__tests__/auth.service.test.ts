@@ -30,7 +30,7 @@ vi.mock('../../utils/jwt', () => ({
 
 import { prisma } from '../../lib/prisma';
 import { hashPassword, verifyPassword } from '../../utils/password';
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../utils/jwt';
+import { verifyRefreshToken } from '../../utils/jwt';
 import * as authService from '../auth.service';
 
 const mockUser = {

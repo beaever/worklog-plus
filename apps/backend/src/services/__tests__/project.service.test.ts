@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AppError } from '../../middleware/error';
 
 vi.mock('../../lib/prisma', () => ({
   prisma: {
@@ -49,7 +48,7 @@ describe('project.service', () => {
         });
       });
 
-      const result = await projectService.createProject('user-1', {
+      await projectService.createProject('user-1', {
         name: '테스트 프로젝트',
         status: 'ACTIVE',
         startDate: '2024-01-01',
@@ -75,10 +74,10 @@ describe('project.service', () => {
       vi.mocked(prisma.project.findMany).mockResolvedValue([] as any);
       vi.mocked(prisma.project.count).mockResolvedValue(0);
 
-      await projectService.getProjects('user-1', { page: 1, limit: 10, status: 'COMPLETED' });
+      await projectService.getProjects('user-1', { page: 1, limit: 10, status: 'DONE' });
 
       const findManyCall = vi.mocked(prisma.project.findMany).mock.calls[0]?.[0];
-      expect(findManyCall?.where).toMatchObject({ status: 'COMPLETED' });
+      expect(findManyCall?.where).toMatchObject({ status: 'DONE' });
     });
   });
 
