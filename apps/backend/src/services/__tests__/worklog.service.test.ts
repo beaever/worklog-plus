@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { Worklog, ProjectMember } from '@prisma/client';
 
 vi.mock('../../lib/prisma', () => ({
   prisma: {
@@ -19,7 +20,12 @@ vi.mock('../../lib/prisma', () => ({
 import { prisma } from '../../lib/prisma';
 import * as worklogService from '../worklog.service';
 
-const mockMember = { projectId: 'proj-1', userId: 'user-1', access: 'WRITE' };
+const mockMember = {
+  projectId: 'proj-1',
+  userId: 'user-1',
+  access: 'WRITE',
+} satisfies Partial<ProjectMember> as unknown as ProjectMember;
+
 const mockWorklog = {
   id: 'wl-1',
   title: '테스트 업무일지',
@@ -32,7 +38,7 @@ const mockWorklog = {
   updatedAt: new Date(),
   project: { id: 'proj-1', name: '테스트 프로젝트' },
   user: { id: 'user-1', name: '작성자', avatarUrl: null },
-};
+} satisfies Partial<Worklog> & { project: unknown; user: unknown } as unknown as Worklog;
 
 describe('worklog.service', () => {
   beforeEach(() => {
@@ -41,8 +47,8 @@ describe('worklog.service', () => {
 
   describe('createWorklog', () => {
     it('WRITE 권한이 있는 멤버는 업무일지를 생성할 수 있어야 함', async () => {
-      vi.mocked(prisma.projectMember.findUnique).mockResolvedValue(mockMember as any);
-      vi.mocked(prisma.worklog.create).mockResolvedValue(mockWorklog as any);
+      vi.mocked(prisma.projectMember.findUnique).mockResolvedValue(mockMember);
+      vi.mocked(prisma.worklog.create).mockResolvedValue(mockWorklog);
 
       const result = await worklogService.createWorklog('user-1', {
         title: '테스트 업무일지',
@@ -74,7 +80,7 @@ describe('worklog.service', () => {
       vi.mocked(prisma.projectMember.findUnique).mockResolvedValue({
         ...mockMember,
         access: 'READ',
-      } as any);
+      } as unknown as ProjectMember);
 
       await expect(
         worklogService.createWorklog('user-1', {
@@ -90,7 +96,7 @@ describe('worklog.service', () => {
 
   describe('getWorklogs', () => {
     it('일반 사용자는 접근 가능한 프로젝트의 업무일지만 조회해야 함', async () => {
-      vi.mocked(prisma.worklog.findMany).mockResolvedValue([mockWorklog] as any);
+      vi.mocked(prisma.worklog.findMany).mockResolvedValue([mockWorklog]);
       vi.mocked(prisma.worklog.count).mockResolvedValue(1);
 
       const result = await worklogService.getWorklogs('user-1', 'USER', { page: 1, limit: 10 });
@@ -103,7 +109,7 @@ describe('worklog.service', () => {
     });
 
     it('ADMIN은 모든 프로젝트의 업무일지를 조회할 수 있어야 함', async () => {
-      vi.mocked(prisma.worklog.findMany).mockResolvedValue([mockWorklog] as any);
+      vi.mocked(prisma.worklog.findMany).mockResolvedValue([mockWorklog]);
       vi.mocked(prisma.worklog.count).mockResolvedValue(1);
 
       await worklogService.getWorklogs('admin-1', 'ADMIN', { page: 1, limit: 10 });
@@ -115,8 +121,8 @@ describe('worklog.service', () => {
 
   describe('getWorklogById', () => {
     it('멤버인 사용자는 업무일지를 조회할 수 있어야 함', async () => {
-      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog as any);
-      vi.mocked(prisma.projectMember.findUnique).mockResolvedValue(mockMember as any);
+      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog);
+      vi.mocked(prisma.projectMember.findUnique).mockResolvedValue(mockMember);
 
       const result = await worklogService.getWorklogById('wl-1', 'user-1', 'USER');
 
@@ -132,7 +138,7 @@ describe('worklog.service', () => {
     });
 
     it('프로젝트 멤버가 아닌 사용자는 403 에러를 받아야 함', async () => {
-      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog as any);
+      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog);
       vi.mocked(prisma.projectMember.findUnique).mockResolvedValue(null);
 
       await expect(
@@ -143,11 +149,11 @@ describe('worklog.service', () => {
 
   describe('updateWorklog', () => {
     it('작성자는 자신의 업무일지를 수정할 수 있어야 함', async () => {
-      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog as any);
+      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog);
       vi.mocked(prisma.worklog.update).mockResolvedValue({
         ...mockWorklog,
         title: '수정된 제목',
-      } as any);
+      } as unknown as Worklog);
 
       const result = await worklogService.updateWorklog('wl-1', 'user-1', 'USER', {
         title: '수정된 제목',
@@ -162,7 +168,7 @@ describe('worklog.service', () => {
     });
 
     it('다른 사용자의 업무일지를 수정하면 403 에러를 던져야 함', async () => {
-      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog as any);
+      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog);
 
       await expect(
         worklogService.updateWorklog('wl-1', 'user-2', 'USER', { title: '수정' }),
@@ -170,8 +176,8 @@ describe('worklog.service', () => {
     });
 
     it('ADMIN은 타인의 업무일지도 수정할 수 있어야 함', async () => {
-      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog as any);
-      vi.mocked(prisma.worklog.update).mockResolvedValue(mockWorklog as any);
+      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog);
+      vi.mocked(prisma.worklog.update).mockResolvedValue(mockWorklog);
 
       await expect(
         worklogService.updateWorklog('wl-1', 'admin-1', 'ADMIN', { title: '수정' }),
@@ -189,8 +195,8 @@ describe('worklog.service', () => {
 
   describe('deleteWorklog', () => {
     it('작성자는 자신의 업무일지를 삭제할 수 있어야 함', async () => {
-      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog as any);
-      vi.mocked(prisma.worklog.delete).mockResolvedValue(mockWorklog as any);
+      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog);
+      vi.mocked(prisma.worklog.delete).mockResolvedValue(mockWorklog);
 
       await expect(
         worklogService.deleteWorklog('wl-1', 'user-1', 'USER'),
@@ -200,7 +206,7 @@ describe('worklog.service', () => {
     });
 
     it('다른 사용자의 업무일지를 삭제하면 403 에러를 던져야 함', async () => {
-      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog as any);
+      vi.mocked(prisma.worklog.findUnique).mockResolvedValue(mockWorklog);
 
       await expect(
         worklogService.deleteWorklog('wl-1', 'user-2', 'USER'),

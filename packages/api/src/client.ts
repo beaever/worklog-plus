@@ -8,65 +8,26 @@ interface RequestConfig extends RequestInit {
 }
 
 let isRefreshing = false;
-let refreshSubscribers: Array<(token: string) => void> = [];
+let refreshSubscribers: Array<() => void> = [];
 
-function onRefreshed(token: string) {
-  refreshSubscribers.forEach((callback) => callback(token));
+function onRefreshed() {
+  refreshSubscribers.forEach((callback) => callback());
   refreshSubscribers = [];
 }
 
-function addRefreshSubscriber(callback: (token: string) => void) {
+function addRefreshSubscriber(callback: () => void) {
   refreshSubscribers.push(callback);
 }
 
-function getAccessToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('accessToken');
-}
-
-function getRefreshToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('refreshToken');
-}
-
-function setTokens(accessToken: string, refreshToken: string) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem('accessToken', accessToken);
-  localStorage.setItem('refreshToken', refreshToken);
-}
-
-function clearTokens() {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
-}
-
-async function refreshAccessToken(): Promise<string | null> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return null;
-
+async function refreshAccessToken(): Promise<boolean> {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
+      credentials: 'include',
     });
-
-    if (!response.ok) {
-      clearTokens();
-      return null;
-    }
-
-    const data = await response.json();
-    if (data.accessToken && data.refreshToken) {
-      setTokens(data.accessToken, data.refreshToken);
-      return data.accessToken;
-    }
-
-    return null;
+    return response.ok;
   } catch {
-    clearTokens();
-    return null;
+    return false;
   }
 }
 
@@ -74,7 +35,7 @@ async function request<T>(
   endpoint: string,
   config: RequestConfig = {},
 ): Promise<ApiResponse<T>> {
-  const { params, skipAuth, ...init } = config;
+  const { params, skipAuth: _skipAuth, ...init } = config;
 
   let url = `${API_BASE_URL}${endpoint}`;
   if (params) {
@@ -94,46 +55,33 @@ async function request<T>(
     });
   }
 
-  if (!skipAuth) {
-    const token = getAccessToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-  }
-
   try {
     let response = await fetch(url, {
       ...init,
       headers,
+      credentials: 'include',
     });
 
-    if (response.status === 401 && !skipAuth) {
+    if (response.status === 401) {
       if (!isRefreshing) {
         isRefreshing = true;
-        const newToken = await refreshAccessToken();
+        const refreshed = await refreshAccessToken();
         isRefreshing = false;
 
-        if (newToken) {
-          onRefreshed(newToken);
-          headers['Authorization'] = `Bearer ${newToken}`;
-          response = await fetch(url, { ...init, headers });
+        if (refreshed) {
+          onRefreshed();
+          response = await fetch(url, { ...init, headers, credentials: 'include' });
         } else {
           if (typeof window !== 'undefined') {
             window.location.href = '/login';
           }
-          return {
-            success: false,
-            error: 'Authentication failed. Please login again.',
-          };
+          return { success: false, error: '인증이 만료되었습니다. 다시 로그인해주세요.' };
         }
       } else {
-        const newToken = await new Promise<string>((resolve) => {
-          addRefreshSubscriber((token: string) => {
-            resolve(token);
-          });
+        await new Promise<void>((resolve) => {
+          addRefreshSubscriber(resolve);
         });
-        headers['Authorization'] = `Bearer ${newToken}`;
-        response = await fetch(url, { ...init, headers });
+        response = await fetch(url, { ...init, headers, credentials: 'include' });
       }
     }
 
@@ -142,8 +90,8 @@ async function request<T>(
       return {
         success: false,
         error:
-          errorData.message ||
-          errorData.error ||
+          (errorData as { message?: string; error?: string }).message ||
+          (errorData as { message?: string; error?: string }).error ||
           `HTTP Error: ${response.status}`,
       };
     }
@@ -156,7 +104,7 @@ async function request<T>(
       error:
         error instanceof Error
           ? error.message
-          : 'Network error. Please check your connection.',
+          : '네트워크 오류가 발생했습니다.',
     };
   }
 }

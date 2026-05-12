@@ -209,7 +209,7 @@ export const getPeriodStats = async (
   period: 'week' | 'month' | 'year',
 ) => {
   const now = new Date();
-  let entries: Array<{ label: string; start: Date; end: Date }> = [];
+  const entries: Array<{ label: string; start: Date; end: Date }> = [];
 
   if (period === 'week') {
     for (let i = 6; i >= 0; i--) {

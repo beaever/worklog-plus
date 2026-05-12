@@ -9,14 +9,21 @@
   },
   "scripts": {
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@worklog-plus/types": "workspace:*",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.1.0",
+    "@vitest/coverage-v8": "^2.1.8",
     "@worklog-plus/config": "workspace:*",
-    "typescript": "^5.7.2"
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   }
 }

@@ -6,4 +6,10 @@ export default [
   {
     ignores: ['dist/**', 'node_modules/**', 'prisma/**'],
   },
+  {
+    files: ['**/__tests__/**/*.ts', '**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
 ];

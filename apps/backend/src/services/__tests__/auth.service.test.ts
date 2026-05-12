@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { User, RefreshToken } from '@prisma/client';
 import { AppError } from '../../middleware/error';
 
 vi.mock('../../lib/prisma', () => ({
@@ -42,8 +43,9 @@ const mockUser = {
   createdAt: new Date(),
   updatedAt: new Date(),
   avatarUrl: null,
+  lastLoginAt: null,
   status: 'ACTIVE',
-};
+} satisfies Partial<User> as unknown as User;
 
 describe('auth.service', () => {
   beforeEach(() => {
@@ -53,8 +55,8 @@ describe('auth.service', () => {
   describe('register', () => {
     it('새 사용자를 등록하고 토큰을 반환해야 함', async () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
-      vi.mocked(prisma.user.create).mockResolvedValue(mockUser as any);
-      vi.mocked(prisma.refreshToken.create).mockResolvedValue({} as any);
+      vi.mocked(prisma.user.create).mockResolvedValue(mockUser);
+      vi.mocked(prisma.refreshToken.create).mockResolvedValue({} as unknown as RefreshToken);
 
       const result = await authService.register('test@example.com', 'Password123!', '테스트 사용자');
 
@@ -68,7 +70,7 @@ describe('auth.service', () => {
     });
 
     it('이메일 중복 시 409 에러를 던져야 함', async () => {
-      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
 
       await expect(
         authService.register('test@example.com', 'Password123!', '테스트'),
@@ -82,10 +84,10 @@ describe('auth.service', () => {
 
   describe('login', () => {
     it('올바른 자격증명으로 로그인하면 토큰을 반환해야 함', async () => {
-      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
       vi.mocked(verifyPassword).mockResolvedValue(true);
       vi.mocked(prisma.refreshToken.deleteMany).mockResolvedValue({ count: 0 });
-      vi.mocked(prisma.refreshToken.create).mockResolvedValue({} as any);
+      vi.mocked(prisma.refreshToken.create).mockResolvedValue({} as unknown as RefreshToken);
 
       const result = await authService.login('test@example.com', 'Password123!');
 
@@ -105,7 +107,7 @@ describe('auth.service', () => {
     });
 
     it('잘못된 비밀번호로 로그인 시 401 에러를 던져야 함', async () => {
-      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
       vi.mocked(verifyPassword).mockResolvedValue(false);
 
       await expect(authService.login('test@example.com', 'WrongPassword')).rejects.toMatchObject({
@@ -144,8 +146,8 @@ describe('auth.service', () => {
         userId: 'user-1',
         expiresAt: new Date(Date.now() + 86400000),
         user: mockUser,
-      } as any);
-      vi.mocked(prisma.$transaction).mockResolvedValue([{}, {}] as any);
+      } as unknown as RefreshToken);
+      vi.mocked(prisma.$transaction).mockResolvedValue([{}, {}] as unknown as [RefreshToken, RefreshToken]);
 
       const result = await authService.refresh('valid-token');
 
@@ -173,8 +175,8 @@ describe('auth.service', () => {
         userId: 'user-1',
         expiresAt: new Date(Date.now() - 1000),
         user: mockUser,
-      } as any);
-      vi.mocked(prisma.refreshToken.delete).mockResolvedValue({} as any);
+      } as unknown as RefreshToken);
+      vi.mocked(prisma.refreshToken.delete).mockResolvedValue({} as unknown as RefreshToken);
 
       await expect(authService.refresh('expired-token')).rejects.toMatchObject({ statusCode: 401 });
     });
