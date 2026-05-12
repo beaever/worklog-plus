@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Request, Response, NextFunction } from 'express';
+import type { User } from '@prisma/client';
 
 vi.mock('../../services/auth.service', () => ({
   register: vi.fn(),
@@ -29,7 +30,7 @@ const mockUser = {
   lastLoginAt: null,
   createdAt: new Date(),
   updatedAt: new Date(),
-};
+} satisfies Partial<User> as unknown as User;
 
 function mockRes() {
   const res = {
@@ -197,7 +198,7 @@ describe('auth.controller', () => {
 
   describe('getCurrentUser', () => {
     it('인증된 사용자 정보를 반환하되 passwordHash는 제외해야 함', async () => {
-      vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser as any);
+      vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser);
 
       const req = {
         user: { userId: 'user-1', email: 'test@example.com', role: 'USER' },

@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { act } from 'react';
-import { renderHook } from '@testing-library/react';
+import { act } from '@testing-library/react';
 
 // Zustand store를 직접 import
 import { useUserStore } from '../user-store';
@@ -24,8 +23,6 @@ describe('useUserStore', () => {
         name: '테스트',
         role: 'USER' as const,
         status: 'ACTIVE' as const,
-        avatarUrl: null,
-        lastLoginAt: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -55,8 +52,6 @@ describe('useUserStore', () => {
         name: '테스트',
         role: 'USER' as const,
         status: 'ACTIVE' as const,
-        avatarUrl: null,
-        lastLoginAt: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
