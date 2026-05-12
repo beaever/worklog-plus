@@ -46,10 +46,14 @@ export const authenticate = (
   next: NextFunction,
 ): void => {
   try {
-    // Authorization 헤더 확인
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
+    // Authorization 헤더 우선, 없으면 쿠키 fallback
+    const token = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : (req.cookies as Record<string, string> | undefined)?.accessToken;
+
+    if (!token) {
       res.status(401).json({
         success: false,
         error: '인증 토큰이 필요합니다',
@@ -57,36 +61,10 @@ export const authenticate = (
       return;
     }
 
-    // Bearer 토큰 형식 확인
-    if (!authHeader.startsWith('Bearer ')) {
-      res.status(401).json({
-        success: false,
-        error: '잘못된 토큰 형식입니다. "Bearer {token}" 형식이어야 합니다',
-      });
-      return;
-    }
-
-    // 토큰 추출 (Bearer 제거)
-    const token = authHeader.substring(7);
-
-    if (!token) {
-      res.status(401).json({
-        success: false,
-        error: '토큰이 제공되지 않았습니다',
-      });
-      return;
-    }
-
-    // 토큰 검증
     const payload = verifyAccessToken(token);
-
-    // 사용자 정보를 요청 객체에 저장
     req.user = payload;
-
-    // 다음 미들웨어로 진행
     next();
   } catch (error) {
-    // 토큰 검증 실패
     const errorMessage =
       error instanceof Error ? error.message : '토큰 검증 실패';
 

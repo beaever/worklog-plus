@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
    * workspace 내 패키지들을 자동으로 트랜스파일합니다.
    */
   transpilePackages: [
+    '@worklog-plus/components',
     '@worklog-plus/ui',
     '@worklog-plus/hooks',
     '@worklog-plus/store',

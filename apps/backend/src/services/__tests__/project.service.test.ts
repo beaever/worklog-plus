@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { Project, ProjectMember } from '@prisma/client';
 
 vi.mock('../../lib/prisma', () => ({
   prisma: {
@@ -30,7 +31,7 @@ const mockProject = {
   endDate: null,
   createdAt: new Date(),
   updatedAt: new Date(),
-};
+} satisfies Partial<Project> as unknown as Project;
 
 describe('project.service', () => {
   beforeEach(() => {
@@ -39,13 +40,14 @@ describe('project.service', () => {
 
   describe('createProject', () => {
     it('프로젝트를 생성하고 소유자를 멤버로 추가해야 함', async () => {
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        vi.mocked(prisma.project.create).mockResolvedValue(mockProject as any);
-        vi.mocked(prisma.projectMember.create).mockResolvedValue({} as any);
+      vi.mocked(prisma.$transaction).mockImplementation(async (fn: (tx: typeof prisma) => Promise<unknown>) => {
+        vi.mocked(prisma.project.create).mockResolvedValue(mockProject);
+        vi.mocked(prisma.projectMember.create).mockResolvedValue({} as unknown as ProjectMember);
         return fn({
-          project: { create: vi.fn().mockResolvedValue(mockProject) },
-          projectMember: { create: vi.fn().mockResolvedValue({}) },
-        });
+          ...prisma,
+          project: { ...prisma.project, create: vi.fn().mockResolvedValue(mockProject) },
+          projectMember: { ...prisma.projectMember, create: vi.fn().mockResolvedValue({}) },
+        } as unknown as typeof prisma);
       });
 
       await projectService.createProject('user-1', {
@@ -60,7 +62,7 @@ describe('project.service', () => {
 
   describe('getProjects', () => {
     it('사용자가 접근 가능한 프로젝트 목록을 반환해야 함', async () => {
-      vi.mocked(prisma.project.findMany).mockResolvedValue([mockProject] as any);
+      vi.mocked(prisma.project.findMany).mockResolvedValue([mockProject]);
       vi.mocked(prisma.project.count).mockResolvedValue(1);
 
       const result = await projectService.getProjects('user-1', { page: 1, limit: 10 });
@@ -71,7 +73,7 @@ describe('project.service', () => {
     });
 
     it('status 필터가 where 조건에 반영되어야 함', async () => {
-      vi.mocked(prisma.project.findMany).mockResolvedValue([] as any);
+      vi.mocked(prisma.project.findMany).mockResolvedValue([]);
       vi.mocked(prisma.project.count).mockResolvedValue(0);
 
       await projectService.getProjects('user-1', { page: 1, limit: 10, status: 'DONE' });
@@ -88,7 +90,7 @@ describe('project.service', () => {
         owner: { id: 'user-1', name: '소유자', avatarUrl: null },
         members: [{ userId: 'user-1' }],
         _count: { worklogs: 0 },
-      } as any);
+      } as unknown as Project);
 
       const result = await projectService.getProjectById('proj-1', 'user-1');
 
@@ -110,7 +112,7 @@ describe('project.service', () => {
         owner: { id: 'user-2', name: '소유자', avatarUrl: null },
         members: [],
         _count: { worklogs: 0 },
-      } as any);
+      } as unknown as Project);
 
       await expect(projectService.getProjectById('proj-1', 'user-1')).rejects.toMatchObject({
         statusCode: 403,
@@ -120,11 +122,11 @@ describe('project.service', () => {
 
   describe('updateProject', () => {
     it('소유자는 프로젝트를 수정할 수 있어야 함', async () => {
-      vi.mocked(prisma.project.findUnique).mockResolvedValue(mockProject as any);
+      vi.mocked(prisma.project.findUnique).mockResolvedValue(mockProject);
       vi.mocked(prisma.project.update).mockResolvedValue({
         ...mockProject,
         name: '수정된 이름',
-      } as any);
+      } as unknown as Project);
 
       const result = await projectService.updateProject('proj-1', 'user-1', 'USER', {
         name: '수정된 이름',
@@ -138,7 +140,7 @@ describe('project.service', () => {
     });
 
     it('소유자가 아닌 일반 사용자는 403 에러를 던져야 함', async () => {
-      vi.mocked(prisma.project.findUnique).mockResolvedValue(mockProject as any);
+      vi.mocked(prisma.project.findUnique).mockResolvedValue(mockProject);
 
       await expect(
         projectService.updateProject('proj-1', 'user-2', 'USER', { name: '수정' }),
@@ -146,8 +148,8 @@ describe('project.service', () => {
     });
 
     it('ADMIN은 소유자가 아니어도 수정할 수 있어야 함', async () => {
-      vi.mocked(prisma.project.findUnique).mockResolvedValue(mockProject as any);
-      vi.mocked(prisma.project.update).mockResolvedValue(mockProject as any);
+      vi.mocked(prisma.project.findUnique).mockResolvedValue(mockProject);
+      vi.mocked(prisma.project.update).mockResolvedValue(mockProject);
 
       await expect(
         projectService.updateProject('proj-1', 'admin-1', 'ADMIN', { name: '수정' }),
@@ -165,8 +167,8 @@ describe('project.service', () => {
 
   describe('deleteProject', () => {
     it('소유자는 프로젝트를 삭제할 수 있어야 함', async () => {
-      vi.mocked(prisma.project.findUnique).mockResolvedValue(mockProject as any);
-      vi.mocked(prisma.project.delete).mockResolvedValue(mockProject as any);
+      vi.mocked(prisma.project.findUnique).mockResolvedValue(mockProject);
+      vi.mocked(prisma.project.delete).mockResolvedValue(mockProject);
 
       await expect(
         projectService.deleteProject('proj-1', 'user-1', 'USER'),
@@ -176,7 +178,7 @@ describe('project.service', () => {
     });
 
     it('소유자가 아닌 일반 사용자는 403 에러를 던져야 함', async () => {
-      vi.mocked(prisma.project.findUnique).mockResolvedValue(mockProject as any);
+      vi.mocked(prisma.project.findUnique).mockResolvedValue(mockProject);
 
       await expect(
         projectService.deleteProject('proj-1', 'user-2', 'USER'),

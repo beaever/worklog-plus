@@ -1,26 +1,33 @@
-/**
- * 인증 컨트롤러
- *
- * @description
- * - HTTP 요청/응답 처리
- * - 서비스 계층 호출
- * - 에러 처리
- */
-
 import type { Request, Response, NextFunction } from 'express';
 import * as authService from '../services/auth.service';
-import type {
-  LoginInput,
-  RegisterInput,
-  RefreshTokenInput,
-} from '../schemas/auth.schema';
+import type { LoginInput, RegisterInput } from '../schemas/auth.schema';
 import type { AuthRequest } from '../middleware/auth';
+import { AppError } from '../middleware/error';
+import { env } from '../config/env';
 
-/**
- * 회원가입
- *
- * POST /api/auth/register
- */
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: env.NODE_ENV === 'production',
+  sameSite: 'strict' as const,
+  path: '/',
+};
+
+function setAuthCookies(res: Response, accessToken: string, refreshToken: string): void {
+  res.cookie('accessToken', accessToken, {
+    ...COOKIE_OPTIONS,
+    maxAge: 15 * 60 * 1000, // 15분
+  });
+  res.cookie('refreshToken', refreshToken, {
+    ...COOKIE_OPTIONS,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+  });
+}
+
+function clearAuthCookies(res: Response): void {
+  res.clearCookie('accessToken', COOKIE_OPTIONS);
+  res.clearCookie('refreshToken', COOKIE_OPTIONS);
+}
+
 export const register = async (
   req: Request<object, object, RegisterInput>,
   res: Response,
@@ -28,23 +35,19 @@ export const register = async (
 ): Promise<void> => {
   try {
     const { email, password, name } = req.body;
-
     const result = await authService.register(email, password, name);
+
+    setAuthCookies(res, result.accessToken, result.refreshToken);
 
     res.status(201).json({
       success: true,
-      data: result,
+      data: { user: result.user },
     });
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * 로그인
- *
- * POST /api/auth/login
- */
 export const login = async (
   req: Request<object, object, LoginInput>,
   res: Response,
@@ -52,36 +55,34 @@ export const login = async (
 ): Promise<void> => {
   try {
     const { email, password } = req.body;
-
     const result = await authService.login(email, password);
+
+    setAuthCookies(res, result.accessToken, result.refreshToken);
 
     res.status(200).json({
       success: true,
-      data: result,
+      data: { user: result.user },
     });
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * 로그아웃
- *
- * POST /api/auth/logout
- */
 export const logout = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { refreshToken } = req.body as { refreshToken?: string };
+    const refreshToken = req.cookies?.refreshToken as string | undefined;
     const userId = req.user?.userId;
 
     await authService.logout({
       ...(refreshToken !== undefined && { refreshToken }),
       ...(userId !== undefined && { userId }),
     });
+
+    clearAuthCookies(res);
 
     res.status(200).json({
       success: true,
@@ -92,35 +93,31 @@ export const logout = async (
   }
 };
 
-/**
- * 토큰 갱신
- *
- * POST /api/auth/refresh
- */
 export const refreshToken = async (
-  req: Request<object, object, RefreshTokenInput>,
+  req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { refreshToken } = req.body;
+    const token = req.cookies?.refreshToken as string | undefined;
 
-    const result = await authService.refresh(refreshToken);
+    if (!token) {
+      throw new AppError(401, 'Refresh Token이 필요합니다');
+    }
+
+    const result = await authService.refresh(token);
+
+    setAuthCookies(res, result.accessToken, result.refreshToken);
 
     res.status(200).json({
       success: true,
-      data: result,
+      data: { user: result.user },
     });
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * 현재 사용자 정보 조회
- *
- * GET /api/auth/me
- */
 export const getCurrentUser = async (
   req: AuthRequest,
   res: Response,
@@ -128,12 +125,10 @@ export const getCurrentUser = async (
 ): Promise<void> => {
   try {
     if (!req.user?.userId) {
-      throw new Error('인증되지 않은 사용자입니다');
+      throw new AppError(401, '인증되지 않은 사용자입니다');
     }
 
     const user = await authService.getCurrentUser(req.user.userId);
-
-    // 비밀번호 해시 제거
     const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
 
     res.status(200).json({
