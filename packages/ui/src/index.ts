@@ -9,5 +9,6 @@ export * from './components/dialog';
 export * from './components/responsive-modal';
 export * from './components/label';
 export * from './components/select';
+export * from './components/form';
 export * from './skeleton';
 export * from './lib/utils';

@@ -15,6 +15,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { useUserStore } from '@worklog-plus/store';
+import { useLogout } from '@/hooks/use-auth';
 
 const navigation = [
   { name: '대시보드', href: '/dashboard', icon: LayoutDashboard },
@@ -35,7 +36,8 @@ interface MobileSidebarProps {
 
 export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const pathname = usePathname();
-  const { user, logout } = useUserStore();
+  const user = useUserStore((state) => state.user);
+  const logoutMutation = useLogout();
 
   useEffect(() => {
     if (isOpen) {
@@ -53,8 +55,8 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   }, [pathname]);
 
   const handleLogout = () => {
-    logout();
     onClose();
+    logoutMutation.mutate();
   };
 
   if (!isOpen) return null;
@@ -140,9 +142,10 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
               variant='ghost'
               className='w-full justify-start gap-3 text-muted-foreground hover:text-destructive'
               onClick={handleLogout}
+              disabled={logoutMutation.isPending}
             >
               <LogOut className='h-5 w-5' />
-              로그아웃
+              {logoutMutation.isPending ? '로그아웃 중...' : '로그아웃'}
             </Button>
           </div>
         )}
