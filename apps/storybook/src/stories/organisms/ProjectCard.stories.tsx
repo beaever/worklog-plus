@@ -1,122 +1,99 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ProjectCard } from '@worklog-plus/components';
-import type { ProjectSummary } from '@worklog-plus/types';
 
 const meta: Meta<typeof ProjectCard> = {
   title: 'Organisms/ProjectCard',
   component: ProjectCard,
-  parameters: {
-    layout: 'centered',
-  },
+  parameters: { layout: 'centered' },
   tags: ['autodocs'],
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const mockProject: ProjectSummary = {
-  id: '1',
-  name: 'WorkLog+ 백엔드',
-  status: 'ACTIVE',
-  progress: 65,
-  worklogCount: 24,
-  updatedAt: new Date().toISOString(),
+const today = new Date().toISOString();
+
+// 컴파운드 패턴 전체 사용 예시
+export const Compound: Story = {
+  render: () => (
+    <div className='w-80'>
+      <ProjectCard onClick={() => {}}>
+        <ProjectCard.Header>
+          <div className='flex items-center gap-2'>
+            <ProjectCard.Icon />
+            <ProjectCard.Title>WorkLog+ 백엔드</ProjectCard.Title>
+          </div>
+          <ProjectCard.Status status='ACTIVE' />
+        </ProjectCard.Header>
+        <ProjectCard.Progress value={65} />
+        <ProjectCard.Footer>
+          <ProjectCard.Count count={24} />
+          <ProjectCard.UpdatedAt date={today} />
+        </ProjectCard.Footer>
+      </ProjectCard>
+    </div>
+  ),
 };
 
 export const Active: Story = {
-  args: {
-    project: mockProject,
-  },
+  render: () => (
+    <div className='w-80'>
+      <ProjectCard>
+        <ProjectCard.Header>
+          <div className='flex items-center gap-2'>
+            <ProjectCard.Icon />
+            <ProjectCard.Title>WorkLog+ 백엔드</ProjectCard.Title>
+          </div>
+          <ProjectCard.Status status='ACTIVE' />
+        </ProjectCard.Header>
+        <ProjectCard.Progress value={65} />
+        <ProjectCard.Footer>
+          <ProjectCard.Count count={24} />
+          <ProjectCard.UpdatedAt date={today} />
+        </ProjectCard.Footer>
+      </ProjectCard>
+    </div>
+  ),
 };
 
 export const Planned: Story = {
-  args: {
-    project: {
-      ...mockProject,
-      id: '2',
-      name: '모바일 앱 개발',
-      status: 'PLANNED',
-      progress: 10,
-      worklogCount: 3,
-    },
-  },
+  render: () => (
+    <div className='w-80'>
+      <ProjectCard>
+        <ProjectCard.Header>
+          <div className='flex items-center gap-2'>
+            <ProjectCard.Icon />
+            <ProjectCard.Title>모바일 앱 개발</ProjectCard.Title>
+          </div>
+          <ProjectCard.Status status='PLANNED' />
+        </ProjectCard.Header>
+        <ProjectCard.Progress value={10} />
+        <ProjectCard.Footer>
+          <ProjectCard.Count count={3} />
+          <ProjectCard.UpdatedAt date={today} />
+        </ProjectCard.Footer>
+      </ProjectCard>
+    </div>
+  ),
 };
 
 export const Done: Story = {
-  args: {
-    project: {
-      ...mockProject,
-      id: '3',
-      name: 'API 문서화',
-      status: 'DONE',
-      progress: 100,
-      worklogCount: 12,
-    },
-  },
-};
-
-export const LowProgress: Story = {
-  args: {
-    project: {
-      ...mockProject,
-      id: '4',
-      name: '신규 프로젝트',
-      status: 'ACTIVE',
-      progress: 15,
-      worklogCount: 2,
-    },
-  },
-};
-
-export const HighProgress: Story = {
-  args: {
-    project: {
-      ...mockProject,
-      id: '5',
-      name: '거의 완료된 프로젝트',
-      status: 'ACTIVE',
-      progress: 95,
-      worklogCount: 45,
-    },
-  },
-};
-
-export const AllStatuses: Story = {
   render: () => (
-    <div
-      className='grid gap-4 w-[900px]'
-      style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}
-    >
-      <ProjectCard
-        project={{
-          id: '1',
-          name: '예정된 프로젝트',
-          status: 'PLANNED',
-          progress: 0,
-          worklogCount: 0,
-          updatedAt: new Date().toISOString(),
-        }}
-      />
-      <ProjectCard
-        project={{
-          id: '2',
-          name: '진행중인 프로젝트',
-          status: 'ACTIVE',
-          progress: 65,
-          worklogCount: 24,
-          updatedAt: new Date().toISOString(),
-        }}
-      />
-      <ProjectCard
-        project={{
-          id: '3',
-          name: '완료된 프로젝트',
-          status: 'DONE',
-          progress: 100,
-          worklogCount: 48,
-          updatedAt: new Date().toISOString(),
-        }}
-      />
+    <div className='w-80'>
+      <ProjectCard>
+        <ProjectCard.Header>
+          <div className='flex items-center gap-2'>
+            <ProjectCard.Icon />
+            <ProjectCard.Title>API 문서화</ProjectCard.Title>
+          </div>
+          <ProjectCard.Status status='DONE' />
+        </ProjectCard.Header>
+        <ProjectCard.Progress value={100} />
+        <ProjectCard.Footer>
+          <ProjectCard.Count count={12} />
+          <ProjectCard.UpdatedAt date={today} />
+        </ProjectCard.Footer>
+      </ProjectCard>
     </div>
   ),
 };

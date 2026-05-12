@@ -1,8 +1,9 @@
 'use client';
 
-import { Card, CardHeader, CardContent, Badge } from '@worklog-plus/ui';
+import * as React from 'react';
+import { Card, CardHeader, CardContent, CardFooter, Badge } from '@worklog-plus/ui';
 import { FolderOpen, Clock } from 'lucide-react';
-import type { ProjectSummary, ProjectStatus } from '@worklog-plus/types';
+import type { ProjectStatus } from '@worklog-plus/types';
 
 const statusConfig: Record<
   ProjectStatus,
@@ -12,11 +13,6 @@ const statusConfig: Record<
   ACTIVE: { label: '진행중', variant: 'default' },
   DONE: { label: '완료', variant: 'outline' },
 };
-
-interface ProjectCardProps {
-  project: ProjectSummary;
-  onClick?: () => void;
-}
 
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
@@ -31,46 +27,97 @@ function formatRelativeTime(dateString: string): string {
   return `${Math.floor(diffDays / 30)}개월 전`;
 }
 
-export function ProjectCard({ project, onClick }: ProjectCardProps) {
-  const { label, variant } = statusConfig[project.status];
+// 서브컴포넌트들
 
+interface ProjectCardRootProps {
+  children?: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+}
+
+function ProjectCardRoot({ children, onClick, className }: ProjectCardRootProps) {
   return (
     <Card
-      className='cursor-pointer transition-shadow hover:shadow-md'
+      role='article'
+      className={`cursor-pointer transition-shadow hover:shadow-md ${className ?? ''}`}
       onClick={onClick}
     >
-      <CardHeader className='pb-2'>
-        <div className='flex items-start justify-between'>
-          <div className='flex items-center gap-2'>
-            <FolderOpen className='h-5 w-5 text-primary' />
-            <h3 className='font-semibold'>{project.name}</h3>
-          </div>
-          <Badge variant={variant}>{label}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className='space-y-3'>
-          <div className='space-y-1'>
-            <div className='flex justify-between text-sm'>
-              <span className='text-muted-foreground'>진행률</span>
-              <span className='font-medium'>{project.progress}%</span>
-            </div>
-            <div className='h-2 w-full rounded-full bg-secondary'>
-              <div
-                className='h-full rounded-full bg-primary transition-all'
-                style={{ width: `${project.progress}%` }}
-              />
-            </div>
-          </div>
-          <div className='flex items-center justify-between text-xs text-muted-foreground'>
-            <span>업무일지 {project.worklogCount}개</span>
-            <span className='flex items-center gap-1'>
-              <Clock className='h-3 w-3' />
-              {formatRelativeTime(project.updatedAt)}
-            </span>
-          </div>
-        </div>
-      </CardContent>
+      {children}
     </Card>
   );
 }
+
+function ProjectCardHeader({ children }: { children?: React.ReactNode }) {
+  return (
+    <CardHeader className='pb-2'>
+      <div className='flex items-start justify-between'>{children}</div>
+    </CardHeader>
+  );
+}
+
+function ProjectCardIcon() {
+  return <FolderOpen className='h-5 w-5 text-primary' />;
+}
+
+function ProjectCardTitle({ children }: { children?: React.ReactNode }) {
+  return <h3 className='font-semibold'>{children}</h3>;
+}
+
+function ProjectCardStatus({ status }: { status: ProjectStatus }) {
+  const { label, variant } = statusConfig[status];
+  return <Badge variant={variant}>{label}</Badge>;
+}
+
+function ProjectCardProgress({ value }: { value: number }) {
+  return (
+    <CardContent>
+      <div className='space-y-1'>
+        <div className='flex justify-between text-sm'>
+          <span className='text-muted-foreground'>진행률</span>
+          <span className='font-medium'>{value}%</span>
+        </div>
+        <div className='h-2 w-full rounded-full bg-secondary'>
+          <div
+            className='h-full rounded-full bg-primary transition-all'
+            style={{ width: `${value}%` }}
+          />
+        </div>
+      </div>
+    </CardContent>
+  );
+}
+
+function ProjectCardFooter({ children }: { children?: React.ReactNode }) {
+  return (
+    <CardFooter className='pt-0'>
+      <div className='flex items-center justify-between w-full text-xs text-muted-foreground'>
+        {children}
+      </div>
+    </CardFooter>
+  );
+}
+
+function ProjectCardCount({ count }: { count: number }) {
+  return <span>업무일지 {count}개</span>;
+}
+
+function ProjectCardUpdatedAt({ date }: { date: string }) {
+  return (
+    <span className='flex items-center gap-1'>
+      <Clock className='h-3 w-3' />
+      {formatRelativeTime(date)}
+    </span>
+  );
+}
+
+// 컴파운드 패턴 조합 (Object.assign)
+export const ProjectCard = Object.assign(ProjectCardRoot, {
+  Header: ProjectCardHeader,
+  Icon: ProjectCardIcon,
+  Title: ProjectCardTitle,
+  Status: ProjectCardStatus,
+  Progress: ProjectCardProgress,
+  Footer: ProjectCardFooter,
+  Count: ProjectCardCount,
+  UpdatedAt: ProjectCardUpdatedAt,
+});

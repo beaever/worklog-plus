@@ -352,23 +352,38 @@ importers:
         version: link:../ui
       lucide-react:
         specifier: ^0.344.0
-        version: 0.344.0(react@18.3.1)
+        version: 0.344.0(react@19.2.6)
       react:
         specifier: ^18.0.0 || ^19.0.0
-        version: 18.3.1
+        version: 19.2.6
     devDependencies:
+      '@testing-library/jest-dom':
+        specifier: ^6.6.3
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^16.1.0
+        version: 16.3.2(@testing-library/dom@10.4.0)(@types/react-dom@19.2.3(@types/react@19.2.10))(@types/react@19.2.10)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@types/react':
         specifier: ^19.0.2
         version: 19.2.10
+      '@vitejs/plugin-react':
+        specifier: 4.3.4
+        version: 4.3.4(vite@5.4.21(@types/node@22.19.7)(lightningcss@1.27.0)(terser@5.46.0))
       '@worklog-plus/config':
         specifier: workspace:*
         version: link:../config
+      jsdom:
+        specifier: ^25.0.1
+        version: 25.0.1
       tsup:
         specifier: ^8.0.0
         version: 8.5.1(jiti@1.21.7)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.7)(jsdom@25.0.1)(lightningcss@1.27.0)(terser@5.46.0)
 
   packages/config:
     dependencies:
@@ -3235,6 +3250,12 @@ packages:
     resolution: {integrity: sha512-TQMCz2pFJMfpNxmSfX1VSfTjwUIFx/mL+p1bnfM1xjjdla7Z+KnGMW/EhFbpckp3LyWAH4PgOsMwOMnIN+MBFg==}
     peerDependencies:
       '@urql/core': ^5.0.0
+
+  '@vitejs/plugin-react@4.3.4':
+    resolution: {integrity: sha512-SCCPBJtYLdE8PX/7ZQAs1QAZ8Jqwih+0VBLum1EGqmCCQal+MIUqLCzj3ZUy8ufbC0cAM4LRlSTm7IQJwWT4ug==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    peerDependencies:
+      vite: ^4.2.0 || ^5.0.0 || ^6.0.0
 
   '@vitejs/plugin-react@4.7.0':
     resolution: {integrity: sha512-gUu9hwfWvvEDBBmgtAowQCojwZmJ5mcLn3aufeCsitijs3+f2NsrPtlAWIR6OPiqljl96GVCUbLe0HyqIpVaoA==}
@@ -10655,6 +10676,17 @@ snapshots:
       '@urql/core': 5.2.0
       wonka: 6.3.5
 
+  '@vitejs/plugin-react@4.3.4(vite@5.4.21(@types/node@22.19.7)(lightningcss@1.27.0)(terser@5.46.0))':
+    dependencies:
+      '@babel/core': 7.29.0
+      '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.29.0)
+      '@babel/plugin-transform-react-jsx-source': 7.27.1(@babel/core@7.29.0)
+      '@types/babel__core': 7.20.5
+      react-refresh: 0.14.2
+      vite: 5.4.21(@types/node@22.19.7)(lightningcss@1.27.0)(terser@5.46.0)
+    transitivePeerDependencies:
+      - supports-color
+
   '@vitejs/plugin-react@4.7.0(vite@5.4.21(@types/node@22.19.7)(lightningcss@1.27.0)(terser@5.46.0))':
     dependencies:
       '@babel/core': 7.29.0
@@ -13224,6 +13256,10 @@ snapshots:
   lucide-react@0.344.0(react@18.3.1):
     dependencies:
       react: 18.3.1
+
+  lucide-react@0.344.0(react@19.2.6):
+    dependencies:
+      react: 19.2.6
 
   lucide-react@0.469.0(react@19.2.4):
     dependencies:
