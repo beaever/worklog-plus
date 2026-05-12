@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useUserStore } from '@worklog-plus/store';
+import { authApi } from '@worklog-plus/api';
 
 const PUBLIC_PATHS = ['/login', '/register', '/'];
 
@@ -14,12 +15,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const { isAuthenticated, isLoading, setLoading } = useUserStore();
+  const { isAuthenticated, isLoading, setLoading, login, logout } = useUserStore();
 
   useEffect(() => {
-    // 모의 인증: localStorage에서 상태 복원 후 로딩 완료
-    setLoading(false);
-  }, [setLoading]);
+    const checkAuth = async () => {
+      const response = await authApi.me();
+      if (response.success && response.data?.user) {
+        login(response.data.user);
+      } else {
+        logout();
+      }
+      setLoading(false);
+    };
+
+    checkAuth();
+  }, [login, logout, setLoading]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -35,10 +45,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       router.push('/login');
     }
 
-    if (
-      isAuthenticated &&
-      (pathname === '/login' || pathname === '/register')
-    ) {
+    if (isAuthenticated && (pathname === '/login' || pathname === '/register')) {
       router.push('/dashboard');
     }
   }, [isAuthenticated, isLoading, pathname, router]);

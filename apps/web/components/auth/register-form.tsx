@@ -71,12 +71,7 @@ export function RegisterForm() {
       updatedAt: new Date().toISOString(),
     };
 
-    const mockTokens = {
-      accessToken: `mock_access_${Date.now()}`,
-      refreshToken: `mock_refresh_${Date.now()}`,
-    };
-
-    login(mockUser, mockTokens);
+    login(mockUser);
     setIsLoading(false);
     router.push('/dashboard');
   };
