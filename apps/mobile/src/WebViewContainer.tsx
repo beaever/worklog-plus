@@ -57,6 +57,8 @@ export function WebViewContainer() {
         injectedJavaScript={config.injectedJS}
         javaScriptEnabled
         domStorageEnabled
+        sharedCookiesEnabled
+        thirdPartyCookiesEnabled
         startInLoadingState
         allowsBackForwardNavigationGestures
         pullToRefreshEnabled={false}

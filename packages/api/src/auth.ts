@@ -3,7 +3,7 @@ import type { User } from '@worklog-plus/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 
-interface AuthSuccessData {
+export interface AuthSuccessData {
   user: User;
 }
 

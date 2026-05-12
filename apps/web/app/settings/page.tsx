@@ -13,7 +13,8 @@ import { toast } from 'sonner';
 export default function SettingsPage() {
   const router = useRouter();
   const { logout } = useUserStore();
-  const { data: user } = useCurrentUser();
+  const { data: userData } = useCurrentUser();
+  const user = userData?.user;
   const { theme, setTheme } = useTheme();
   const updateProfileMutation = useUpdateProfile();
   const changePasswordMutation = useChangePassword();
