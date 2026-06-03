@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.107.0",
     "@tanstack/react-query": "^5.62.8",
     "@worklog-plus/api": "workspace:*",
     "@worklog-plus/components": "workspace:*",
@@ -35,12 +37,12 @@
     "sonner": "^2.0.7"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
     "@types/node": "^22.10.2",
     "@types/nprogress": "^0.2.3",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/coverage-v8": "^2.1.8",
     "@worklog-plus/config": "workspace:*",
