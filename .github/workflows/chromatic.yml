@@ -45,6 +45,8 @@ jobs:
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           storybookBuildDir: apps/storybook/storybook-static
+          # 모노레포: TurboSnap이 레포 루트 기준으로 파일을 추적하도록 Storybook 프로젝트 경로 지정
+          storybookBaseDir: apps/storybook
           onlyChanged: true
           exitZeroOnChanges: true
           autoAcceptChanges: main
