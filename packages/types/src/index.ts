@@ -5,6 +5,7 @@ export * from './common';
 export * from './auth';
 export * from './admin';
 export * from './validation';
+export * from './database.types';
 
 // WorklogWithRelations: 목록 응답에 포함되는 확장 타입
 export interface WorklogWithRelations {
