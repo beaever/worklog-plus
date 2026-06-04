@@ -28,9 +28,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Generate Prisma Client
-        run: pnpm --filter @worklog-plus/backend exec prisma generate
-
       - name: Run linter
         run: pnpm lint
 
@@ -59,12 +56,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Rebuild native addons
-        run: pnpm --filter @worklog-plus/backend rebuild bcrypt
-
-      - name: Generate Prisma Client
-        run: pnpm --filter @worklog-plus/backend exec prisma generate
-
       - name: Run tests
         run: pnpm test
 
@@ -89,9 +80,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
-
-      - name: Generate Prisma Client
-        run: pnpm --filter @worklog-plus/backend exec prisma generate
 
       - name: Build project
         run: pnpm build

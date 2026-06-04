@@ -28,7 +28,6 @@ const nextConfig: NextConfig = {
     '@worklog-plus/ui',
     '@worklog-plus/hooks',
     '@worklog-plus/store',
-    '@worklog-plus/api',
     '@worklog-plus/types',
   ],
 
