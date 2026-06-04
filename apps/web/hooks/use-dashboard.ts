@@ -7,7 +7,7 @@ import type {
   ProjectDistribution,
   MonthlyTrend,
   RecentWorklog,
-} from '@worklog-plus/api';
+} from '@worklog-plus/types';
 
 // 대시보드 데이터는 서버 Route Handler(/api/dashboard/*)에서 집계해 제공한다.
 async function fetchJson<T>(path: string): Promise<T> {

@@ -29,9 +29,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Generate Prisma Client
-        run: pnpm --filter=@worklog-plus/backend exec prisma generate
-
       - name: Run typecheck
         run: pnpm typecheck
 
