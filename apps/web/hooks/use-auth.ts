@@ -2,9 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { authApi } from '@worklog-plus/api';
 import { useUserStore } from '@worklog-plus/store';
 import type { LoginRequest, RegisterRequest } from '@worklog-plus/types';
+import { createClient } from '@/lib/supabase/client';
+import { fetchProfileById, fetchCurrentUserProfile } from '@/lib/supabase/profile';
 
 export function useLogin(options?: { redirectTo?: string }) {
   const router = useRouter();
@@ -12,17 +13,25 @@ export function useLogin(options?: { redirectTo?: string }) {
 
   return useMutation({
     mutationFn: async (data: LoginRequest) => {
-      const response = await authApi.login(data);
-      if (!response.success) {
-        throw new Error(response.error || '로그인에 실패했습니다');
+      const supabase = createClient();
+      const { data: result, error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+      if (error || !result.user) {
+        throw new Error(
+          error?.message
+            ? '이메일 또는 비밀번호가 올바르지 않습니다'
+            : '로그인에 실패했습니다',
+        );
       }
-      return response.data;
+      const profile = await fetchProfileById(supabase, result.user.id);
+      if (!profile) throw new Error('사용자 프로필을 찾을 수 없습니다');
+      return profile;
     },
-    onSuccess: (data) => {
-      if (data?.user) {
-        login(data.user);
-        router.push(options?.redirectTo ?? '/dashboard');
-      }
+    onSuccess: (user) => {
+      login(user);
+      router.push(options?.redirectTo ?? '/dashboard');
     },
   });
 }
@@ -33,17 +42,25 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: async (data: RegisterRequest) => {
-      const response = await authApi.register(data);
-      if (!response.success) {
-        throw new Error(response.error || '회원가입에 실패했습니다');
+      const supabase = createClient();
+      const { data: result, error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: { data: { name: data.name } },
+      });
+      if (error) throw new Error(error.message || '회원가입에 실패했습니다');
+
+      // 이메일 확인이 필요한 설정이면 세션이 없을 수 있다.
+      if (!result.session || !result.user) {
+        throw new Error('가입이 완료되었습니다. 이메일을 확인한 뒤 로그인해 주세요.');
       }
-      return response.data;
+      const profile = await fetchProfileById(supabase, result.user.id);
+      if (!profile) throw new Error('사용자 프로필 생성에 실패했습니다');
+      return profile;
     },
-    onSuccess: (data) => {
-      if (data?.user) {
-        login(data.user);
-        router.push('/dashboard');
-      }
+    onSuccess: (user) => {
+      login(user);
+      router.push('/dashboard');
     },
   });
 }
@@ -53,24 +70,20 @@ export function useLogout() {
   const logout = useUserStore((state) => state.logout);
   const queryClient = useQueryClient();
 
+  const cleanup = () => {
+    logout();
+    queryClient.clear();
+    router.push('/login');
+  };
+
   return useMutation({
     mutationFn: async () => {
-      const response = await authApi.logout();
-      if (!response.success) {
-        throw new Error(response.error || '로그아웃에 실패했습니다');
-      }
+      const supabase = createClient();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw new Error(error.message || '로그아웃에 실패했습니다');
     },
-    onSuccess: () => {
-      logout();
-      queryClient.clear();
-      router.push('/login');
-    },
-    onError: () => {
-      // 서버 오류 시에도 클라이언트 상태는 정리
-      logout();
-      queryClient.clear();
-      router.push('/login');
-    },
+    onSuccess: cleanup,
+    onError: cleanup, // 서버 오류 시에도 클라이언트 상태는 정리
   });
 }
 
@@ -80,11 +93,11 @@ export function useCurrentUser() {
   return useQuery({
     queryKey: ['auth', 'me'],
     queryFn: async () => {
-      const response = await authApi.me();
-      if (!response.success) {
-        throw new Error(response.error || '사용자 정보를 가져올 수 없습니다');
-      }
-      return response.data;
+      const supabase = createClient();
+      const profile = await fetchCurrentUserProfile(supabase);
+      if (!profile) throw new Error('사용자 정보를 가져올 수 없습니다');
+      // 기존 소비처 호환: { user } 형태로 반환
+      return { user: profile };
     },
     retry: false,
     staleTime: 5 * 60 * 1000,
