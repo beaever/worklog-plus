@@ -6,11 +6,15 @@ import {
   useQueryClient,
   useInfiniteQuery,
 } from '@tanstack/react-query';
-import { worklogsApi } from '@worklog-plus/api';
 import type {
+  Worklog,
   WorklogCreateInput,
   WorklogUpdateInput,
+  PaginationMeta,
+  Database,
 } from '@worklog-plus/types';
+import { createClient } from '@/lib/supabase/client';
+import { mapWorklog } from '@/lib/supabase/mappers';
 
 interface UseWorklogsParams {
   projectId?: string;
@@ -18,126 +22,114 @@ interface UseWorklogsParams {
   limit?: number;
 }
 
-/**
- * 업무일지 목록 조회 query 훅
- *
- * @description
- * - 업무일지 목록을 페이지네이션으로 조회
- * - 프로젝트별 필터링 지원 (projectId)
- * - 30초간 캐시 유지
- *
- * @param params - 조회 파라미터 (projectId, page, limit)
- * @returns 업무일지 목록 쿼리 결과
- *
- * @example
- * const { data, isLoading } = useWorklogs({ projectId: 'project-id', page: 1, limit: 10 });
- */
+function buildMeta(total: number, page: number, limit: number): PaginationMeta {
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  return {
+    total,
+    page,
+    limit,
+    totalPages,
+    hasNext: page < totalPages,
+    hasPrev: page > 1,
+  };
+}
+
+async function fetchWorklogs(
+  projectId: string | undefined,
+  page: number,
+  limit: number,
+): Promise<{ data: Worklog[]; meta: PaginationMeta }> {
+  const supabase = createClient();
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  let query = supabase
+    .from('worklogs')
+    .select('*', { count: 'exact' })
+    .order('date', { ascending: false })
+    .range(from, to);
+
+  if (projectId) query = query.eq('project_id', projectId);
+
+  const { data, count, error } = await query;
+  if (error) throw new Error(error.message);
+
+  return {
+    data: (data ?? []).map(mapWorklog),
+    meta: buildMeta(count ?? 0, page, limit),
+  };
+}
+
+// 업무일지 목록 (RLS: 접근 가능한 프로젝트의 업무일지만)
 export function useWorklogs(params: UseWorklogsParams = {}) {
   const { projectId, page = 1, limit = 10 } = params;
-
   return useQuery({
     queryKey: ['worklogs', { projectId, page, limit }],
-    queryFn: async () => {
-      const response = await worklogsApi.getAll(projectId, page, limit);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to fetch worklogs');
-      }
-      return response.data;
-    },
+    queryFn: () => fetchWorklogs(projectId, page, limit),
     staleTime: 30 * 1000,
   });
 }
 
-/**
- * 업무일지 무한 스크롤 query 훅
- *
- * @description
- * - 업무일지를 무한 스크롤로 조회
- * - useInfiniteQuery를 사용하여 페이지 단위로 데이터 로드
- * - 프로젝트별 필터링 지원
- *
- * @param projectId - 프로젝트 ID (선택사항)
- * @returns 무한 스크롤 쿼리 결과 (pages, fetchNextPage, hasNextPage)
- *
- * @example
- * const { data, fetchNextPage, hasNextPage } = useInfiniteWorklogs('project-id');
- */
+// 업무일지 무한 스크롤
 export function useInfiniteWorklogs(projectId?: string) {
   return useInfiniteQuery({
     queryKey: ['worklogs', 'infinite', projectId],
-    queryFn: async ({ pageParam = 1 }) => {
-      const response = await worklogsApi.getAll(projectId, pageParam, 10);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to fetch worklogs');
-      }
-      return response.data;
-    },
-    getNextPageParam: (lastPage) => {
-      if (!lastPage) return undefined;
-      const meta = (lastPage as { meta?: { page: number; totalPages: number } }).meta;
-      if (!meta) return undefined;
-      return meta.page < meta.totalPages ? meta.page + 1 : undefined;
-    },
+    queryFn: ({ pageParam = 1 }) => fetchWorklogs(projectId, pageParam, 10),
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.hasNext ? lastPage.meta.page + 1 : undefined,
     initialPageParam: 1,
     staleTime: 30 * 1000,
   });
 }
 
-/**
- * 단일 업무일지 상세 정보 조회 query 훅
- *
- * @description
- * - 특정 업무일지의 상세 정보를 조회
- * - ID가 있을 때만 쿼리 실행 (enabled)
- * - 60초간 캐시 유지
- *
- * @param id - 업무일지 ID
- * @returns 업무일지 상세 정보 쿼리 결과
- *
- * @example
- * const { data: worklog, isLoading } = useWorklog('worklog-id');
- */
+// 단일 업무일지
 export function useWorklog(id: string) {
   return useQuery({
     queryKey: ['worklogs', id],
-    queryFn: async () => {
-      const response = await worklogsApi.getById(id);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to fetch worklog');
-      }
-      return response.data;
+    queryFn: async (): Promise<Worklog> => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('worklogs')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error) throw new Error(error.message);
+      return mapWorklog(data);
     },
     enabled: !!id,
     staleTime: 60 * 1000,
   });
 }
 
-/**
- * 업무일지 생성 mutation 훅
- *
- * @description
- * - 새 업무일지를 생성하는 mutation 훅
- * - 성공 시 업무일지 목록 쿼리를 무효화하여 자동 갱신
- *
- * @returns 업무일지 생성 mutation 객체
- *
- * @example
- * const createWorklog = useCreateWorklog();
- * createWorklog.mutate({ title: '제목', content: '내용', projectId: 'project-id', date: '2024-01-01', duration: 4 });
- */
+// 업무일지 생성 (RLS: WRITE 권한 멤버가 본인 명의로만)
 export function useCreateWorklog() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async (data: WorklogCreateInput) => {
-      const response = await worklogsApi.create(data);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to create worklog');
-      }
-      return response.data;
+    mutationFn: async (data: WorklogCreateInput): Promise<Worklog> => {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('로그인이 필요합니다');
+
+      const { data: created, error } = await supabase
+        .from('worklogs')
+        .insert({
+          project_id: data.projectId,
+          user_id: user.id,
+          title: data.title,
+          content: data.content,
+          date: data.date,
+          duration: data.duration,
+        })
+        .select('*')
+        .single();
+      if (error) throw new Error(error.message);
+      return mapWorklog(created);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['worklogs'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       if (data?.projectId) {
         queryClient.invalidateQueries({
           queryKey: ['projects', data.projectId, 'dashboard'],
@@ -147,70 +139,50 @@ export function useCreateWorklog() {
   });
 }
 
-/**
- * 업무일지 수정 mutation 훅
- *
- * @description
- * - 기존 업무일지를 수정하는 mutation 훅
- * - 성공 시 해당 업무일지와 목록 쿼리를 무효화하여 자동 갱신
- *
- * @returns 업무일지 수정 mutation 객체
- *
- * @example
- * const updateWorklog = useUpdateWorklog();
- * updateWorklog.mutate({ id: 'worklog-id', data: { title: '수정된 제목' } });
- */
+// 업무일지 수정 (RLS: 작성자/관리자)
 export function useUpdateWorklog() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async (data: WorklogUpdateInput) => {
-      const response = await worklogsApi.update(data);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to update worklog');
-      }
-      return response.data;
+    mutationFn: async (data: WorklogUpdateInput): Promise<Worklog> => {
+      const supabase = createClient();
+      const patch: Database['public']['Tables']['worklogs']['Update'] = {};
+      if (data.title !== undefined) patch.title = data.title;
+      if (data.content !== undefined) patch.content = data.content;
+      if (data.date !== undefined) patch.date = data.date;
+      if (data.duration !== undefined) patch.duration = data.duration;
+
+      const { data: updated, error } = await supabase
+        .from('worklogs')
+        .update(patch)
+        .eq('id', data.id)
+        .select('*')
+        .single();
+      if (error) throw new Error(error.message);
+      return mapWorklog(updated);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['worklogs'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       if (data?.id) {
         queryClient.invalidateQueries({ queryKey: ['worklogs', data.id] });
       }
-      if (data?.projectId) {
-        queryClient.invalidateQueries({
-          queryKey: ['projects', data.projectId, 'dashboard'],
-        });
-      }
     },
   });
 }
 
-/**
- * 업무일지 삭제 mutation 훅
- *
- * @description
- * - 업무일지를 삭제하는 mutation 훅
- * - 성공 시 업무일지 목록 쿼리를 무효화하여 자동 갱신
- *
- * @returns 업무일지 삭제 mutation 객체
- *
- * @example
- * const deleteWorklog = useDeleteWorklog();
- * deleteWorklog.mutate('worklog-id');
- */
+// 업무일지 삭제 (RLS: 작성자/관리자)
 export function useDeleteWorklog() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async (id: string) => {
-      const response = await worklogsApi.delete(id);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to delete worklog');
-      }
+    mutationFn: async (id: string): Promise<string> => {
+      const supabase = createClient();
+      const { error } = await supabase.from('worklogs').delete().eq('id', id);
+      if (error) throw new Error(error.message);
       return id;
     },
     onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ['worklogs'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.removeQueries({ queryKey: ['worklogs', id] });
     },
   });
