@@ -3,10 +3,11 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@worklog-plus/ui';
-import { Menu, Bell, User, LogOut, Settings } from 'lucide-react';
+import { Menu, User, LogOut, Settings } from 'lucide-react';
 import { useUserStore } from '@worklog-plus/store';
 import { useLogout } from '@/hooks/use-auth';
 import { MobileSidebar } from './mobile-sidebar';
+import { NotificationBell } from './notification-bell';
 
 export function Header() {
   const user = useUserStore((state) => state.user);
@@ -47,9 +48,7 @@ export function Header() {
         </Button>
         <div className='flex-1' />
         <div className='flex items-center gap-2'>
-          <Button variant='ghost' size='icon' title='알림'>
-            <Bell className='h-5 w-5' />
-          </Button>
+          <NotificationBell />
 
           <div className='relative' ref={userMenuRef}>
             <Button
