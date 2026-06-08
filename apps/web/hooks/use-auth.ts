@@ -31,7 +31,10 @@ export function useLogin(options?: { redirectTo?: string }) {
     },
     onSuccess: (user) => {
       login(user);
-      router.push(options?.redirectTo ?? '/dashboard');
+      // replace로 히스토리에 로그인 화면을 남기지 않고, refresh로 서버 컴포넌트/미들웨어가
+      // 새 세션 쿠키를 반영하도록 강제 갱신한다(없으면 미인증 RSC가 캐시돼 로그인 화면에 잔류).
+      router.replace(options?.redirectTo ?? '/dashboard');
+      router.refresh();
     },
   });
 }
@@ -60,7 +63,8 @@ export function useRegister() {
     },
     onSuccess: (user) => {
       login(user);
-      router.push('/dashboard');
+      router.replace('/dashboard');
+      router.refresh();
     },
   });
 }
@@ -73,7 +77,8 @@ export function useLogout() {
   const cleanup = () => {
     logout();
     queryClient.clear();
-    router.push('/login');
+    router.replace('/login');
+    router.refresh();
   };
 
   return useMutation({
