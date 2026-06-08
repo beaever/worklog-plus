@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import type { User } from '@worklog-plus/types';
 
 interface UserState {
@@ -19,56 +18,34 @@ interface UserActions {
 
 type UserStore = UserState & UserActions;
 
-export const useUserStore = create<UserStore>()(
-  persist(
-    (set) => ({
+// 인증 진실원은 Supabase 세션(httpOnly 쿠키)이다.
+// 사용자 상태는 AuthProvider가 세션에서 복원하므로 localStorage에 영속화하지 않는다.
+// (기존 localStorage persist 제거 → 토큰/세션 노출 위험 해소)
+export const useUserStore = create<UserStore>()((set) => ({
+  user: null,
+  isAuthenticated: false,
+  isLoading: true,
+  _hasHydrated: false,
+
+  setUser: (user) => set({ user, isAuthenticated: user !== null }),
+
+  login: (user) => {
+    set({
+      user,
+      isAuthenticated: true,
+      isLoading: false,
+    });
+  },
+
+  logout: () => {
+    set({
       user: null,
       isAuthenticated: false,
-      isLoading: true,
-      _hasHydrated: false,
+      isLoading: false,
+    });
+  },
 
-      setUser: (user) => set({ user, isAuthenticated: user !== null }),
+  setLoading: (isLoading) => set({ isLoading }),
 
-      login: (user) => {
-        set({
-          user,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-      },
-
-      logout: () => {
-        set({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-        });
-      },
-
-      setLoading: (isLoading) => set({ isLoading }),
-
-      setHasHydrated: (state) => set({ _hasHydrated: state }),
-    }),
-    {
-      name: 'worklog-auth',
-      storage: createJSONStorage(() =>
-        typeof window !== 'undefined'
-          ? localStorage
-          : {
-              getItem: () => null,
-              setItem: () => {},
-              removeItem: () => {},
-            },
-      ),
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      }),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          state.setHasHydrated(true);
-        }
-      },
-    },
-  ),
-);
+  setHasHydrated: (state) => set({ _hasHydrated: state }),
+}));

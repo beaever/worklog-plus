@@ -67,13 +67,6 @@ export interface ActivityLogEntry {
   };
 }
 
-export interface DashboardStats {
-  activeProjectCount: number;
-  monthlyWorklogCount: number;
-  totalDurationHours: number;
-  recentActivities: ActivityLogEntry[];
-}
-
 export interface PeriodStats {
   period: 'week' | 'month' | 'year';
   entries: Array<{

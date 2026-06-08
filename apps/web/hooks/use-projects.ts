@@ -6,156 +6,144 @@ import {
   useQueryClient,
   useInfiniteQuery,
 } from '@tanstack/react-query';
-import { projectsApi, type ProjectListParams } from '@worklog-plus/api';
 import type {
   CreateProjectInput,
   UpdateProjectInput,
+  Project,
+  ProjectStatus,
+  ProjectSummary,
+  PaginationMeta,
+  Database,
 } from '@worklog-plus/types';
+import { createClient } from '@/lib/supabase/client';
+import { mapProject, progressFromStatus } from '@/lib/supabase/mappers';
 
-/**
- * 프로젝트 목록 조회 query 훅
- *
- * @description
- * - 프로젝트 목록을 페이지네이션과 필터링 옵션으로 조회
- * - 30초간 캐시 유지
- *
- * @param params - 페이지네이션 및 필터링 파라미터 (page, limit, status, search)
- * @returns 프로젝트 목록 쿼리 결과
- *
- * @example
- * const { data, isLoading } = useProjects({ page: 1, limit: 10, status: 'ACTIVE' });
- */
+export interface ProjectListParams {
+  page?: number;
+  limit?: number;
+  status?: ProjectStatus;
+  search?: string;
+}
+
+function buildMeta(total: number, page: number, limit: number): PaginationMeta {
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  return {
+    total,
+    page,
+    limit,
+    totalPages,
+    hasNext: page < totalPages,
+    hasPrev: page > 1,
+  };
+}
+
+// 프로젝트 목록 (RLS가 접근 가능한 프로젝트만 반환). 카드 표시에 맞춰 ProjectSummary로 매핑.
 export function useProjects(params: ProjectListParams = {}) {
+  const { page = 1, limit = 10, status, search } = params;
+
   return useQuery({
     queryKey: ['projects', params],
-    queryFn: async () => {
-      const response = await projectsApi.getAll(params);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to fetch projects');
-      }
-      return response.data;
+    queryFn: async (): Promise<{ data: ProjectSummary[]; meta: PaginationMeta }> => {
+      const supabase = createClient();
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+
+      let query = supabase
+        .from('projects')
+        .select('id, name, status, updated_at, worklogs(count)', {
+          count: 'exact',
+        })
+        .order('updated_at', { ascending: false })
+        .range(from, to);
+
+      if (status) query = query.eq('status', status);
+      if (search) query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+
+      const { data, count, error } = await query;
+      if (error) throw new Error(error.message);
+
+      const items: ProjectSummary[] = (data ?? []).map((row) => {
+        const worklogs = row.worklogs as unknown as Array<{ count: number }>;
+        return {
+          id: row.id,
+          name: row.name,
+          status: row.status as ProjectStatus,
+          updatedAt: row.updated_at,
+          progress: progressFromStatus(row.status),
+          worklogCount: worklogs?.[0]?.count ?? 0,
+        };
+      });
+
+      return { data: items, meta: buildMeta(count ?? items.length, page, limit) };
     },
     staleTime: 30 * 1000,
   });
 }
 
-/**
- * 단일 프로젝트 상세 정보 조회 query 훅
- *
- * @description
- * - 특정 프로젝트의 상세 정보를 조회
- * - ID가 있을 때만 쿼리 실행 (enabled)
- * - 60초간 캐시 유지
- *
- * @param id - 프로젝트 ID
- * @returns 프로젝트 상세 정보 쿼리 결과
- *
- * @example
- * const { data: project, isLoading } = useProject('project-id');
- */
+// 단일 프로젝트 상세
 export function useProject(id: string) {
   return useQuery({
     queryKey: ['projects', id],
-    queryFn: async () => {
-      const response = await projectsApi.getById(id);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to fetch project');
-      }
-      return response.data;
+    queryFn: async (): Promise<Project> => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error) throw new Error(error.message);
+      return mapProject(data);
     },
     enabled: !!id,
     staleTime: 60 * 1000,
   });
 }
 
-/**
- * 프로젝트 대시보드 데이터 조회 query 훅
- *
- * @description
- * - 프로젝트의 KPI, 진행률, 타임라인 등 대시보드 데이터 조회
- * - ID가 있을 때만 쿼리 실행
- * - 60초간 캐시 유지
- *
- * @param id - 프로젝트 ID
- * @returns 대시보드 데이터 쿼리 결과 (kpi, progress, timeline)
- *
- * @example
- * const { data: dashboard } = useProjectDashboard('project-id');
- */
+// 프로젝트 대시보드 — 현재 데이터 모델에 'task' 개념이 없어 KPI는 비워 둔다.
+// (기존에도 백엔드 미구현으로 빈 상태였음. 페이지는 kpi/progress가 falsy면 해당 섹션을 렌더하지 않음)
 export function useProjectDashboard(id: string) {
   return useQuery({
     queryKey: ['projects', id, 'dashboard'],
-    queryFn: async () => {
-      const response = await projectsApi.getDashboard(id);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to fetch project dashboard');
-      }
-      return response.data;
-    },
+    queryFn: async () => ({
+      projectId: id,
+      kpi: null,
+      progress: null,
+      timeline: [],
+      recentActivities: [],
+    }),
     enabled: !!id,
     staleTime: 60 * 1000,
   });
 }
 
-/**
- * 프로젝트 활동 로그 무한 스크롤 query 훅
- *
- * @description
- * - 프로젝트의 활동 로그를 무한 스크롤로 조회
- * - useInfiniteQuery를 사용하여 페이지 단위로 데이터 로드
- * - 다음 페이지가 있으면 자동으로 페이지 번호 증가
- *
- * @param id - 프로젝트 ID
- * @returns 무한 스크롤 쿼리 결과 (pages, fetchNextPage, hasNextPage)
- *
- * @example
- * const { data, fetchNextPage, hasNextPage } = useProjectActivities('project-id');
- */
+// 프로젝트 활동 로그 — 활동 피드는 후속 단계에서 제공(현재 빈 목록 유지).
 export function useProjectActivities(id: string) {
   return useInfiniteQuery({
     queryKey: ['projects', id, 'activities'],
-    queryFn: async ({ pageParam = 1 }) => {
-      const response = await projectsApi.getActivities(id, pageParam, 20);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to fetch activities');
-      }
-      return response.data;
-    },
-    getNextPageParam: (lastPage) => {
-      if (!lastPage) return undefined;
-      const meta = (lastPage as { meta?: { page: number; totalPages: number } }).meta;
-      if (!meta) return undefined;
-      return meta.page < meta.totalPages ? meta.page + 1 : undefined;
-    },
+    queryFn: async () => ({ data: [], meta: buildMeta(0, 1, 20) }),
+    getNextPageParam: () => undefined,
     initialPageParam: 1,
     enabled: !!id,
     staleTime: 30 * 1000,
   });
 }
 
-/**
- * 프로젝트 생성 mutation 훅
- *
- * @description
- * - 새 프로젝트를 생성하는 mutation 훅
- * - 성공 시 프로젝트 목록 쿼리를 무효화하여 자동 갱신
- *
- * @returns 프로젝트 생성 mutation 객체
- *
- * @example
- * const createProject = useCreateProject();
- * createProject.mutate({ name: '새 프로젝트', status: 'ACTIVE' });
- */
+// 프로젝트 생성 — 프로젝트+소유자 멤버+활동로그를 함께 생성하는 트랜잭션이라 Route Handler에서 처리.
 export function useCreateProject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: CreateProjectInput) => {
-      const response = await projectsApi.create(data);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to create project');
+    mutationFn: async (data: CreateProjectInput): Promise<Project> => {
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(body?.error || '프로젝트 생성에 실패했습니다');
       }
-      return response.data;
+      return body as Project;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
@@ -163,19 +151,7 @@ export function useCreateProject() {
   });
 }
 
-/**
- * 프로젝트 수정 mutation 훅
- *
- * @description
- * - 기존 프로젝트를 수정하는 mutation 훅
- * - 성공 시 해당 프로젝트와 목록 쿼리를 무효화하여 자동 갱신
- *
- * @returns 프로젝트 수정 mutation 객체
- *
- * @example
- * const updateProject = useUpdateProject();
- * updateProject.mutate({ id: 'project-id', data: { name: '수정된 이름' } });
- */
+// 프로젝트 수정 (RLS: 소유자/관리자만)
 export function useUpdateProject() {
   const queryClient = useQueryClient();
 
@@ -186,12 +162,22 @@ export function useUpdateProject() {
     }: {
       id: string;
       data: UpdateProjectInput;
-    }) => {
-      const response = await projectsApi.update(id, data);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to update project');
-      }
-      return response.data;
+    }): Promise<Project> => {
+      const supabase = createClient();
+      const patch: Database['public']['Tables']['projects']['Update'] = {};
+      if (data.name !== undefined) patch.name = data.name;
+      if (data.description !== undefined) patch.description = data.description;
+      if (data.status !== undefined) patch.status = data.status;
+      if (data.endDate !== undefined) patch.end_date = data.endDate;
+
+      const { data: updated, error } = await supabase
+        .from('projects')
+        .update(patch)
+        .eq('id', id)
+        .select('*')
+        .single();
+      if (error) throw new Error(error.message);
+      return mapProject(updated);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
@@ -205,28 +191,15 @@ export function useUpdateProject() {
   });
 }
 
-/**
- * 프로젝트 삭제 mutation 훅
- *
- * @description
- * - 프로젝트를 삭제하는 mutation 훅
- * - 성공 시 프로젝트 목록 쿼리를 무효화하여 자동 갱신
- *
- * @returns 프로젝트 삭제 mutation 객체
- *
- * @example
- * const deleteProject = useDeleteProject();
- * deleteProject.mutate('project-id');
- */
+// 프로젝트 삭제 (RLS: 소유자/관리자만)
 export function useDeleteProject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const response = await projectsApi.delete(id);
-      if (!response.success) {
-        throw new Error(response.error || 'Failed to delete project');
-      }
+    mutationFn: async (id: string): Promise<string> => {
+      const supabase = createClient();
+      const { error } = await supabase.from('projects').delete().eq('id', id);
+      if (error) throw new Error(error.message);
       return id;
     },
     onSuccess: (id) => {
