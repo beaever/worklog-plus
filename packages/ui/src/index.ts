@@ -11,4 +11,5 @@ export * from './components/label';
 export * from './components/select';
 export * from './components/form';
 export * from './skeleton';
+export * from './spinner';
 export * from './lib/utils';
