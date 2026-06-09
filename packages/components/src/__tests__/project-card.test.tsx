@@ -10,6 +10,7 @@ const mockProject: ProjectSummary = {
   progress: 65,
   worklogCount: 24,
   updatedAt: new Date().toISOString(),
+  ownerId: 'owner-1',
 };
 
 describe('ProjectCard 컴파운드 패턴', () => {

@@ -40,10 +40,25 @@ export async function POST(request: Request) {
 
   const admin = createAdminClient();
 
+  // 같은 소유자가 동일한 이름(공백/대소문자 무시)의 프로젝트를 중복 생성하지 못하게 막는다.
+  const trimmedName = input.name.trim();
+  const { data: duplicate } = await admin
+    .from('projects')
+    .select('id')
+    .eq('owner_id', user.id)
+    .ilike('name', trimmedName)
+    .maybeSingle();
+  if (duplicate) {
+    return NextResponse.json(
+      { error: '이미 동일한 이름의 프로젝트가 있습니다' },
+      { status: 409 },
+    );
+  }
+
   const { data: project, error: projectError } = await admin
     .from('projects')
     .insert({
-      name: input.name,
+      name: trimmedName,
       description: input.description ?? null,
       status: input.status,
       start_date: input.startDate,
