@@ -1,16 +1,12 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Button, EmptyState, Input } from '@worklog-plus/ui';
+import { Button, EmptyState, Input, Skeleton } from '@worklog-plus/ui';
 import { FileText, Plus, Search } from 'lucide-react';
 import type { WorklogCreateInput } from '@worklog-plus/types';
 import { WorklogCard } from '@/components/worklog/worklog-card';
 import { WorklogFormModal } from '@/components/worklog/worklog-form-modal';
-import {
-  useWorklogs,
-  useCreateWorklog,
-  useDeleteWorklog,
-} from '@/hooks/use-worklogs';
+import { useWorklogs, useCreateWorklog } from '@/hooks/use-worklogs';
 import { useProjects } from '@/hooks/use-projects';
 
 export default function WorklogsPage() {
@@ -24,7 +20,6 @@ export default function WorklogsPage() {
   const { data: projectsData } = useProjects({ page: 1, limit: 100 });
 
   const createWorklogMutation = useCreateWorklog();
-  const deleteWorklogMutation = useDeleteWorklog();
 
   const worklogs = worklogsData?.data || [];
   const projects =
@@ -46,10 +41,6 @@ export default function WorklogsPage() {
     });
   };
 
-  const handleDeleteWorklog = (id: string) => {
-    deleteWorklogMutation.mutate(id);
-  };
-
   const getProjectName = (projectId: string) => {
     return projects.find((p) => p.id === projectId)?.name ?? '알 수 없음';
   };
@@ -66,11 +57,19 @@ export default function WorklogsPage() {
           </div>
         </div>
         <div className='space-y-4'>
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className='h-32 animate-pulse rounded-lg bg-muted'
-            ></div>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className='space-y-3 rounded-lg border bg-card p-6'>
+              <div className='flex items-center justify-between'>
+                <Skeleton className='h-5 w-40' />
+                <Skeleton className='h-5 w-16 rounded-full' />
+              </div>
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='h-4 w-2/3' />
+              <div className='flex gap-4 pt-1'>
+                <Skeleton className='h-3 w-20' />
+                <Skeleton className='h-3 w-16' />
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -126,13 +125,20 @@ export default function WorklogsPage() {
         />
       ) : (
         <div className='space-y-4'>
-          {filteredWorklogs.map((worklog) => (
-            <WorklogCard
+          {filteredWorklogs.map((worklog, i) => (
+            <div
               key={worklog.id}
-              worklog={worklog}
-              projectName={getProjectName(worklog.projectId)}
-              onDelete={() => handleDeleteWorklog(worklog.id)}
-            />
+              className='animate-fade-in-up'
+              style={{
+                animationDelay: `${Math.min(i, 8) * 40}ms`,
+                animationFillMode: 'backwards',
+              }}
+            >
+              <WorklogCard
+                worklog={worklog}
+                projectName={getProjectName(worklog.projectId)}
+              />
+            </div>
           ))}
         </div>
       )}

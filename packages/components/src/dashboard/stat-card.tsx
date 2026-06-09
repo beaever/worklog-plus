@@ -7,7 +7,11 @@ import type { LucideIcon } from 'lucide-react';
 // 서브컴포넌트들
 
 function StatCardRoot({ children }: { children?: React.ReactNode }) {
-  return <Card>{children}</Card>;
+  return (
+    <Card className='transition-all duration-200 hover:border-primary/30 hover:shadow-md'>
+      {children}
+    </Card>
+  );
 }
 
 function StatCardHeader({ children }: { children?: React.ReactNode }) {

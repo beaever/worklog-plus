@@ -94,7 +94,7 @@ export function NotificationBell() {
       </Button>
 
       {isOpen && (
-        <div className='absolute right-0 top-full z-50 mt-2 w-80 rounded-md border bg-card shadow-lg'>
+        <div className='absolute right-0 top-full z-50 mt-2 w-80 origin-top-right animate-scale-in rounded-md border bg-card shadow-lg'>
           <div className='flex items-center justify-between border-b px-3 py-2'>
             <p className='text-sm font-medium'>알림</p>
             {unreadCount > 0 && (
