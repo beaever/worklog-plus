@@ -7,6 +7,7 @@ export interface Project {
   status: ProjectStatus;
   startDate: string;
   endDate?: string;
+  estimatedHours?: number;
   ownerId: string;
   createdAt: string;
   updatedAt: string;
@@ -25,6 +26,7 @@ export interface CreateProjectInput {
   description?: string;
   startDate: string;
   endDate?: string;
+  estimatedHours?: number;
   status: ProjectStatus;
 }
 
@@ -33,6 +35,7 @@ export interface UpdateProjectInput {
   description?: string;
   status?: ProjectStatus;
   endDate?: string;
+  estimatedHours?: number;
 }
 
 // Dashboard Types
@@ -52,9 +55,25 @@ export interface ProjectKPI {
   memberCount: number;
 }
 
+// 일정 대비 진척 건강도. DONE=완료, AHEAD=앞섬, ON_TRACK=정상, BEHIND=지연,
+// UNKNOWN=판단불가(예상 공수 또는 마감일 미설정)
+export type ProjectHealth =
+  | 'DONE'
+  | 'AHEAD'
+  | 'ON_TRACK'
+  | 'BEHIND'
+  | 'UNKNOWN';
+
 export interface ProjectProgress {
-  percentage: number;
+  // 메인 진행률: 누적 업무일지 시간 / 예상 공수. 예상 공수 미설정 시 null.
+  percentage: number | null;
+  // 진행률 막대 색상 구간
   status: 'LOW' | 'MEDIUM' | 'HIGH';
+  loggedHours: number;
+  estimatedHours: number | null;
+  // 일정 경과율((오늘-시작)/(마감-시작)). 마감일 미설정 시 null.
+  scheduleElapsed: number | null;
+  health: ProjectHealth;
 }
 
 export type TimelineEventType =

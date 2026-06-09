@@ -20,7 +20,7 @@ import type {
 import { createClient } from '@/lib/supabase/client';
 import {
   mapProject,
-  progressFromStatus,
+  computeProjectProgress,
   timelineTypeFromAction,
 } from '@/lib/supabase/mappers';
 
@@ -56,9 +56,10 @@ export function useProjects(params: ProjectListParams = {}) {
 
       let query = supabase
         .from('projects')
-        .select('id, name, status, updated_at, owner_id, worklogs(count)', {
-          count: 'exact',
-        })
+        .select(
+          'id, name, status, updated_at, owner_id, start_date, end_date, estimated_hours, worklogs(duration)',
+          { count: 'exact' },
+        )
         .order('updated_at', { ascending: false })
         .range(from, to);
 
@@ -69,15 +70,24 @@ export function useProjects(params: ProjectListParams = {}) {
       if (error) throw new Error(error.message);
 
       const items: ProjectSummary[] = (data ?? []).map((row) => {
-        const worklogs = row.worklogs as unknown as Array<{ count: number }>;
+        const worklogs = row.worklogs as unknown as Array<{ duration: number }>;
+        const loggedHours = worklogs.reduce((acc, w) => acc + (w.duration ?? 0), 0);
+        const progress = computeProjectProgress({
+          status: row.status,
+          startDate: row.start_date,
+          endDate: row.end_date,
+          estimatedHours: row.estimated_hours,
+          loggedHours,
+        });
         return {
           id: row.id,
           name: row.name,
           status: row.status as ProjectStatus,
           updatedAt: row.updated_at,
           ownerId: row.owner_id,
-          progress: progressFromStatus(row.status),
-          worklogCount: worklogs?.[0]?.count ?? 0,
+          // 카드 막대는 단일 수치만 표시 → 예상 공수 미설정 시 0%
+          progress: progress.percentage ?? 0,
+          worklogCount: worklogs.length,
         };
       });
 
@@ -108,15 +118,19 @@ export function useProject(id: string) {
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-// 프로젝트 대시보드 — Task 도메인이 없어 KPI는 업무일지(worklogs) 기반 실데이터로 산출한다.
-// (진행률은 상태 파생, 타임라인은 activity_logs에서 가져온다. 모두 RLS로 접근 가능한 범위만 조회)
+// 프로젝트 대시보드 — KPI/진행률을 업무일지(worklogs) 기반 실데이터로 산출한다.
+// (진행률=예상 공수 대비 누적 시간 + 일정 건강도, 타임라인은 activity_logs. 모두 RLS 범위 내 조회)
 export function useProjectDashboard(id: string) {
   return useQuery({
     queryKey: ['projects', id, 'dashboard'],
     queryFn: async (): Promise<ProjectDashboard> => {
       const supabase = createClient();
       const [projectRes, worklogsRes, memberRes, logsRes] = await Promise.all([
-        supabase.from('projects').select('status').eq('id', id).single(),
+        supabase
+          .from('projects')
+          .select('status, start_date, end_date, estimated_hours')
+          .eq('id', id)
+          .single(),
         supabase.from('worklogs').select('date, duration').eq('project_id', id),
         supabase
           .from('project_members')
@@ -137,8 +151,14 @@ export function useProjectDashboard(id: string) {
       const weekAgo = new Date(Date.now() - WEEK_MS).toISOString().slice(0, 10);
       const totalHours = worklogs.reduce((acc, w) => acc + (w.duration ?? 0), 0);
 
-      const status = projectRes.data?.status ?? 'PLANNED';
-      const percentage = progressFromStatus(status);
+      const project = projectRes.data;
+      const progress = computeProjectProgress({
+        status: project?.status ?? 'PLANNED',
+        startDate: project?.start_date ?? new Date().toISOString().slice(0, 10),
+        endDate: project?.end_date ?? null,
+        estimatedHours: project?.estimated_hours ?? null,
+        loggedHours: totalHours,
+      });
 
       return {
         projectId: id,
@@ -148,10 +168,7 @@ export function useProjectDashboard(id: string) {
           thisWeekWorklogs: worklogs.filter((w) => w.date >= weekAgo).length,
           memberCount: memberRes.count ?? 0,
         },
-        progress: {
-          percentage,
-          status: percentage >= 100 ? 'HIGH' : percentage >= 50 ? 'MEDIUM' : 'LOW',
-        },
+        progress,
         timeline: (logsRes.data ?? []).map((row) => ({
           id: row.id as string,
           type: timelineTypeFromAction(row.action as string),
@@ -255,6 +272,9 @@ export function useUpdateProject() {
       if (data.description !== undefined) patch.description = data.description;
       if (data.status !== undefined) patch.status = data.status;
       if (data.endDate !== undefined) patch.end_date = data.endDate;
+      if (data.estimatedHours !== undefined) {
+        patch.estimated_hours = data.estimatedHours;
+      }
 
       const { data: updated, error } = await supabase
         .from('projects')
