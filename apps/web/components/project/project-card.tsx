@@ -6,9 +6,10 @@ import { ProjectCard as ProjectCardCompound } from '@worklog-plus/components';
 import { Trash2 } from 'lucide-react';
 import { useUserStore } from '@worklog-plus/store';
 import { toast } from 'sonner';
-import type { ProjectSummary } from '@worklog-plus/types';
-import { useDeleteProject } from '@/hooks/use-projects';
+import type { ProjectSummary, ProjectStatus } from '@worklog-plus/types';
+import { useDeleteProject, useUpdateProject } from '@/hooks/use-projects';
 import { DeleteProjectDialog } from './delete-project-dialog';
+import { ProjectStatusSelect } from './project-status-select';
 
 interface ProjectCardProps {
   project: ProjectSummary;
@@ -17,13 +18,28 @@ interface ProjectCardProps {
 export function ProjectCard({ project }: ProjectCardProps) {
   const user = useUserStore((state) => state.user);
   const deleteProjectMutation = useDeleteProject();
+  const updateProjectMutation = useUpdateProject();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  // 소유자 또는 관리자만 카드에서 바로 삭제할 수 있다(실제 권한은 RLS가 최종 통제).
-  const canDelete =
+  // 소유자 또는 관리자만 카드에서 바로 상태 변경/삭제할 수 있다(실제 권한은 RLS가 최종 통제).
+  const canManage =
     user?.id === project.ownerId ||
     user?.role === 'ADMIN' ||
     user?.role === 'SYSTEM_ADMIN';
+
+  const handleStatusChange = (status: ProjectStatus) => {
+    if (status === project.status) return;
+    updateProjectMutation.mutate(
+      { id: project.id, data: { status } },
+      {
+        onSuccess: () => toast.success('상태가 변경되었습니다'),
+        onError: (error) =>
+          toast.error(
+            error instanceof Error ? error.message : '상태 변경에 실패했습니다',
+          ),
+      },
+    );
+  };
 
   const handleDelete = async () => {
     try {
@@ -51,8 +67,24 @@ export function ProjectCard({ project }: ProjectCardProps) {
               </ProjectCardCompound.Title>
             </div>
             <div className='flex shrink-0 items-center gap-1'>
-              <ProjectCardCompound.Status status={project.status} />
-              {canDelete && (
+              {canManage ? (
+                // 카드 전체가 Link이므로 셀렉트 조작이 페이지 이동을 트리거하지 않게 막는다.
+                <span
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  <ProjectStatusSelect
+                    value={project.status}
+                    onChange={handleStatusChange}
+                    disabled={updateProjectMutation.isPending}
+                  />
+                </span>
+              ) : (
+                <ProjectCardCompound.Status status={project.status} />
+              )}
+              {canManage && (
                 <button
                   type='button'
                   aria-label='프로젝트 삭제'
@@ -76,7 +108,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </ProjectCardCompound>
       </Link>
 
-      {canDelete && (
+      {canManage && (
         <DeleteProjectDialog
           open={isDeleteOpen}
           onOpenChange={setIsDeleteOpen}
