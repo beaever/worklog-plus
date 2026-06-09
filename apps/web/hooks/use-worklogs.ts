@@ -127,14 +127,11 @@ export function useCreateWorklog() {
       if (error) throw new Error(error.message);
       return mapWorklog(created);
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['worklogs'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      if (data?.projectId) {
-        queryClient.invalidateQueries({
-          queryKey: ['projects', data.projectId, 'dashboard'],
-        });
-      }
+      // 진행률이 누적 시간에 의존하므로 프로젝트 목록/대시보드도 갱신
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
 }
@@ -163,6 +160,8 @@ export function useUpdateWorklog() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['worklogs'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // 진행률이 누적 시간에 의존하므로 프로젝트 목록/대시보드도 갱신
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       if (data?.id) {
         queryClient.invalidateQueries({ queryKey: ['worklogs', data.id] });
       }
@@ -183,6 +182,8 @@ export function useDeleteWorklog() {
     onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ['worklogs'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // 진행률이 누적 시간에 의존하므로 프로젝트 목록/대시보드도 갱신
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.removeQueries({ queryKey: ['worklogs', id] });
     },
   });
