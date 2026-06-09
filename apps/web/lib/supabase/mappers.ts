@@ -1,4 +1,10 @@
-import type { Database, Project, ProjectStatus, Worklog } from '@worklog-plus/types';
+import type {
+  Database,
+  Project,
+  ProjectStatus,
+  TimelineEventType,
+  Worklog,
+} from '@worklog-plus/types';
 
 type ProjectRow = Database['public']['Tables']['projects']['Row'];
 type WorklogRow = Database['public']['Tables']['worklogs']['Row'];
@@ -38,4 +44,14 @@ export function progressFromStatus(status: string): number {
   if (status === 'DONE') return 100;
   if (status === 'ACTIVE') return 50;
   return 0;
+}
+
+// activity_logs.action(머신용 문자열) → 타임라인 이벤트 타입
+export function timelineTypeFromAction(action: string): TimelineEventType {
+  if (action.includes('created')) return 'CREATED';
+  if (action.includes('status') || action.includes('updated')) {
+    return 'STATUS_CHANGED';
+  }
+  if (action.includes('done') || action.includes('completed')) return 'TASK_DONE';
+  return 'TASK_ADDED';
 }
