@@ -64,7 +64,7 @@ export function ProjectProgress({ progress }: ProjectProgressProps) {
           />
         </div>
         <p className='text-sm text-muted-foreground'>
-          완료된 작업 기준으로 계산됩니다
+          프로젝트 상태 기준으로 계산됩니다
         </p>
       </CardContent>
     </Card>

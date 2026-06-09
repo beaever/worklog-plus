@@ -41,6 +41,7 @@ export default function ProjectDetailPage() {
     data: activitiesData,
     fetchNextPage,
     hasNextPage,
+    isFetchingNextPage,
     isLoading: isLoadingActivities,
   } = useProjectActivities(projectId);
 
@@ -146,6 +147,7 @@ export default function ProjectDetailPage() {
         activities={activities}
         hasMore={hasNextPage || false}
         onLoadMore={() => fetchNextPage()}
+        isLoading={isFetchingNextPage}
       />
 
       {/* Edit Modal */}

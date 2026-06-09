@@ -44,11 +44,12 @@ export interface ProjectDashboard {
   recentActivities: ActivityLog[];
 }
 
+// 데이터 모델에 Task 개념이 없어 KPI는 업무일지(worklogs) 기반 지표로 정의한다.
 export interface ProjectKPI {
-  totalTasks: number;
-  completedTasks: number;
-  inProgressTasks: number;
-  delayedTasks: number;
+  totalWorklogs: number;
+  totalHours: number;
+  thisWeekWorklogs: number;
+  memberCount: number;
 }
 
 export interface ProjectProgress {

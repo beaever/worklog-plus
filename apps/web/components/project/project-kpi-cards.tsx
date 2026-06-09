@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@worklog-plus/ui';
-import { ListTodo, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { FileText, Clock, CalendarDays, Users } from 'lucide-react';
 import type { ProjectKPI } from '@worklog-plus/types';
 
 interface ProjectKPICardsProps {
@@ -10,39 +10,43 @@ interface ProjectKPICardsProps {
 
 const kpiConfig = [
   {
-    key: 'totalTasks' as const,
-    title: '전체 작업',
-    icon: ListTodo,
+    key: 'totalWorklogs' as const,
+    title: '전체 업무일지',
+    icon: FileText,
     color: 'text-blue-500',
     bgColor: 'bg-blue-500/10',
+    suffix: '',
   },
   {
-    key: 'completedTasks' as const,
-    title: '완료',
-    icon: CheckCircle,
+    key: 'totalHours' as const,
+    title: '총 작업시간',
+    icon: Clock,
     color: 'text-green-500',
     bgColor: 'bg-green-500/10',
+    suffix: 'h',
   },
   {
-    key: 'inProgressTasks' as const,
-    title: '진행중',
-    icon: Clock,
+    key: 'thisWeekWorklogs' as const,
+    title: '이번 주',
+    icon: CalendarDays,
     color: 'text-yellow-500',
     bgColor: 'bg-yellow-500/10',
+    suffix: '',
   },
   {
-    key: 'delayedTasks' as const,
-    title: '지연',
-    icon: AlertTriangle,
-    color: 'text-red-500',
-    bgColor: 'bg-red-500/10',
+    key: 'memberCount' as const,
+    title: '참여 멤버',
+    icon: Users,
+    color: 'text-purple-500',
+    bgColor: 'bg-purple-500/10',
+    suffix: '명',
   },
 ];
 
 export function ProjectKPICards({ kpi }: ProjectKPICardsProps) {
   return (
     <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-      {kpiConfig.map(({ key, title, icon: Icon, color, bgColor }) => (
+      {kpiConfig.map(({ key, title, icon: Icon, color, bgColor, suffix }) => (
         <Card key={key}>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
             <CardTitle className='text-sm font-medium'>{title}</CardTitle>
@@ -51,7 +55,14 @@ export function ProjectKPICards({ kpi }: ProjectKPICardsProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>{kpi[key]}</div>
+            <div className='text-2xl font-bold'>
+              {kpi[key]}
+              {suffix && (
+                <span className='ml-1 text-base font-medium text-muted-foreground'>
+                  {suffix}
+                </span>
+              )}
+            </div>
           </CardContent>
         </Card>
       ))}
