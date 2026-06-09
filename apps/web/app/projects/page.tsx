@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, EmptyState } from '@worklog-plus/ui';
+import { Button, EmptyState, Skeleton } from '@worklog-plus/ui';
 import { FolderOpen, Plus } from 'lucide-react';
 import type { ProjectStatus, CreateProjectInput } from '@worklog-plus/types';
 import { ProjectCard } from '@/components/project/project-card';
@@ -71,11 +71,18 @@ export default function ProjectsPage() {
           </div>
         </div>
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className='h-48 animate-pulse rounded-lg bg-muted'
-            ></div>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className='space-y-4 rounded-lg border bg-card p-6'>
+              <div className='flex items-center justify-between'>
+                <Skeleton className='h-5 w-32' />
+                <Skeleton className='h-5 w-12 rounded-full' />
+              </div>
+              <Skeleton className='h-2 w-full rounded-full' />
+              <div className='flex justify-between'>
+                <Skeleton className='h-3 w-20' />
+                <Skeleton className='h-3 w-16' />
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -127,8 +134,17 @@ export default function ProjectsPage() {
         />
       ) : (
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-          {filteredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+          {filteredProjects.map((project, i) => (
+            <div
+              key={project.id}
+              className='animate-fade-in-up'
+              style={{
+                animationDelay: `${Math.min(i, 8) * 40}ms`,
+                animationFillMode: 'backwards',
+              }}
+            >
+              <ProjectCard project={project} />
+            </div>
           ))}
         </div>
       )}

@@ -42,7 +42,7 @@ function WorklogCardRoot({ children, onClick, className }: WorklogCardRootProps)
   return (
     <Card
       role='article'
-      className={`cursor-pointer transition-shadow hover:shadow-md ${className ?? ''}`}
+      className={`group cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md active:translate-y-0 ${className ?? ''}`}
       onClick={onClick}
     >
       {children}

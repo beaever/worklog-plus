@@ -68,6 +68,18 @@
   }
 }
 
+/* 모션 민감 사용자: 애니메이션/트랜지션 무력화 (접근성) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Radix Portal 배경색 - Portal은 body 외부에 렌더링되므로 직접 지정 */
 [data-radix-select-content],
 [data-radix-select-viewport],
