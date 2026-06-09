@@ -39,7 +39,7 @@ function ProjectCardRoot({ children, onClick, className }: ProjectCardRootProps)
   return (
     <Card
       role='article'
-      className={`cursor-pointer transition-shadow hover:shadow-md ${className ?? ''}`}
+      className={`group cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md active:translate-y-0 ${className ?? ''}`}
       onClick={onClick}
     >
       {children}
@@ -50,22 +50,29 @@ function ProjectCardRoot({ children, onClick, className }: ProjectCardRootProps)
 function ProjectCardHeader({ children }: { children?: React.ReactNode }) {
   return (
     <CardHeader className='pb-2'>
-      <div className='flex items-start justify-between'>{children}</div>
+      <div className='flex items-start justify-between gap-2'>{children}</div>
     </CardHeader>
   );
 }
 
 function ProjectCardIcon() {
-  return <FolderOpen className='h-5 w-5 text-primary' />;
+  return (
+    <FolderOpen className='h-5 w-5 text-primary transition-transform duration-200 group-hover:scale-110' />
+  );
 }
 
 function ProjectCardTitle({ children }: { children?: React.ReactNode }) {
-  return <h3 className='font-semibold'>{children}</h3>;
+  return <h3 className='break-words font-semibold'>{children}</h3>;
 }
 
 function ProjectCardStatus({ status }: { status: ProjectStatus }) {
   const { label, variant } = statusConfig[status];
-  return <Badge variant={variant}>{label}</Badge>;
+  // 제목이 여러 줄로 늘어나도 배지 크기가 변하지 않도록 축소/줄바꿈을 막는다.
+  return (
+    <Badge variant={variant} className='shrink-0 whitespace-nowrap'>
+      {label}
+    </Badge>
+  );
 }
 
 function ProjectCardProgress({ value }: { value: number }) {
@@ -78,7 +85,7 @@ function ProjectCardProgress({ value }: { value: number }) {
         </div>
         <div className='h-2 w-full rounded-full bg-secondary'>
           <div
-            className='h-full rounded-full bg-primary transition-all'
+            className='h-full rounded-full bg-primary transition-all duration-500 ease-out'
             style={{ width: `${value}%` }}
           />
         </div>

@@ -2,8 +2,21 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@worklog-plus/ui';
-import { Bell, BellOff } from 'lucide-react';
+import { Bell, BellOff, CheckCheck } from 'lucide-react';
 import { useNotifications } from '@/hooks/use-notifications';
+
+// 알림은 별도 테이블 없이 activity_logs를 재활용하므로 읽음 상태는 클라이언트 localStorage로 관리한다.
+const STORAGE_KEY = 'worklog:read-notifications';
+
+function loadReadIds(): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+  } catch {
+    return new Set();
+  }
+}
 
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
@@ -21,8 +34,13 @@ function formatRelativeTime(dateString: string): string {
 
 export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
+  const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const menuRef = useRef<HTMLDivElement>(null);
   const { data: notifications = [], isLoading, isError } = useNotifications();
+
+  useEffect(() => {
+    setReadIds(loadReadIds());
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -34,7 +52,30 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const persist = (ids: Set<string>) => {
+    setReadIds(new Set(ids));
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]));
+    } catch {
+      // localStorage 접근 실패 시 메모리 상태만 유지한다.
+    }
+  };
+
+  const markRead = (id: string) => {
+    if (readIds.has(id)) return;
+    const next = new Set(readIds);
+    next.add(id);
+    persist(next);
+  };
+
+  const markAllRead = () => {
+    const next = new Set(readIds);
+    notifications.forEach((n) => next.add(n.id));
+    persist(next);
+  };
+
   const hasItems = notifications.length > 0;
+  const unreadCount = notifications.filter((n) => !readIds.has(n.id)).length;
 
   return (
     <div className='relative' ref={menuRef}>
@@ -45,15 +86,27 @@ export function NotificationBell() {
         onClick={() => setIsOpen((v) => !v)}
       >
         <Bell className='h-5 w-5' />
-        {hasItems && (
-          <span className='absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive' />
+        {unreadCount > 0 && (
+          <span className='absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium leading-none text-destructive-foreground'>
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
         )}
       </Button>
 
       {isOpen && (
-        <div className='absolute right-0 top-full mt-2 w-80 rounded-md border bg-card shadow-lg'>
-          <div className='border-b px-3 py-2'>
+        <div className='absolute right-0 top-full z-50 mt-2 w-80 origin-top-right animate-scale-in rounded-md border bg-card shadow-lg'>
+          <div className='flex items-center justify-between border-b px-3 py-2'>
             <p className='text-sm font-medium'>알림</p>
+            {unreadCount > 0 && (
+              <button
+                type='button'
+                onClick={markAllRead}
+                className='flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground'
+              >
+                <CheckCheck className='h-3.5 w-3.5' />
+                모두 읽음
+              </button>
+            )}
           </div>
 
           {isLoading ? (
@@ -71,15 +124,40 @@ export function NotificationBell() {
             </div>
           ) : (
             <ul className='max-h-96 divide-y overflow-y-auto'>
-              {notifications.map((n) => (
-                <li key={n.id} className='px-3 py-2 hover:bg-accent'>
-                  <p className='line-clamp-2 text-sm'>{n.description}</p>
-                  <p className='mt-0.5 text-xs text-muted-foreground'>
-                    {n.actorName ? `${n.actorName} · ` : ''}
-                    {formatRelativeTime(n.createdAt)}
-                  </p>
-                </li>
-              ))}
+              {notifications.map((n) => {
+                const isRead = readIds.has(n.id);
+                return (
+                  <li key={n.id}>
+                    <button
+                      type='button'
+                      onClick={() => markRead(n.id)}
+                      className='flex w-full items-start gap-2 px-3 py-2 text-left transition-colors hover:bg-accent'
+                    >
+                      <span
+                        className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
+                          isRead ? 'bg-transparent' : 'bg-primary'
+                        }`}
+                        aria-hidden
+                      />
+                      <span className='min-w-0 flex-1'>
+                        <span
+                          className={`line-clamp-2 block text-sm ${
+                            isRead
+                              ? 'text-muted-foreground'
+                              : 'font-medium text-foreground'
+                          }`}
+                        >
+                          {n.description}
+                        </span>
+                        <span className='mt-0.5 block text-xs text-muted-foreground'>
+                          {n.actorName ? `${n.actorName} · ` : ''}
+                          {formatRelativeTime(n.createdAt)}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

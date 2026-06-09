@@ -31,8 +31,7 @@
     --chart-5: 27 87% 67%;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
+  .dark {
       --background: 222.2 84% 4.9%;
       --foreground: 210 40% 98%;
       --card: 222.2 84% 4.9%;
@@ -57,7 +56,6 @@
       --chart-3: 30 80% 55%;
       --chart-4: 280 65% 60%;
       --chart-5: 340 75% 55%;
-    }
   }
 }
 
@@ -70,6 +68,18 @@
   }
 }
 
+/* 모션 민감 사용자: 애니메이션/트랜지션 무력화 (접근성) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Radix Portal 배경색 - Portal은 body 외부에 렌더링되므로 직접 지정 */
 [data-radix-select-content],
 [data-radix-select-viewport],
@@ -78,11 +88,9 @@
   color: hsl(222.2 84% 4.9%);
 }
 
-@media (prefers-color-scheme: dark) {
-  [data-radix-select-content],
-  [data-radix-select-viewport],
-  [data-radix-select-item] {
-    background-color: hsl(222.2 84% 4.9%) !important;
-    color: hsl(210 40% 98%);
-  }
+.dark [data-radix-select-content],
+.dark [data-radix-select-viewport],
+.dark [data-radix-select-item] {
+  background-color: hsl(222.2 84% 4.9%) !important;
+  color: hsl(210 40% 98%);
 }

@@ -57,6 +57,16 @@ export function ProjectFormModal({
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // 종료 예정일이 시작일보다 이전이면 제출을 막고 안내한다(입력 즉시 반영).
+  const isEndBeforeStart =
+    endDate && startDate
+      ? new Date(endDate) < new Date(startDate)
+      : false;
+  const endDateError = isEndBeforeStart
+    ? '종료 예정일을 시작일 이후로 변경해주세요'
+    : errors.endDate;
+  const canSubmit = !isLoading && !!name.trim() && !isEndBeforeStart;
+
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -195,8 +205,8 @@ export function ProjectFormModal({
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
-              {errors.endDate && (
-                <p className='text-sm text-destructive'>{errors.endDate}</p>
+              {endDateError && (
+                <p className='text-sm text-destructive'>{endDateError}</p>
               )}
             </div>
           </div>
@@ -209,8 +219,14 @@ export function ProjectFormModal({
             >
               취소
             </Button>
-            <Button type='submit' disabled={isLoading}>
-              {isLoading ? '저장 중...' : isEdit ? '수정' : '생성'}
+            <Button type='submit' disabled={!canSubmit}>
+              {isLoading
+                ? isEdit
+                  ? '수정 중...'
+                  : '생성 중...'
+                : isEdit
+                  ? '수정'
+                  : '생성'}
             </Button>
           </ResponsiveModal.Footer>
         </form>
