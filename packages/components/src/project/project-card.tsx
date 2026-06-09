@@ -50,7 +50,7 @@ function ProjectCardRoot({ children, onClick, className }: ProjectCardRootProps)
 function ProjectCardHeader({ children }: { children?: React.ReactNode }) {
   return (
     <CardHeader className='pb-2'>
-      <div className='flex items-start justify-between'>{children}</div>
+      <div className='flex items-start justify-between gap-2'>{children}</div>
     </CardHeader>
   );
 }
@@ -60,12 +60,17 @@ function ProjectCardIcon() {
 }
 
 function ProjectCardTitle({ children }: { children?: React.ReactNode }) {
-  return <h3 className='font-semibold'>{children}</h3>;
+  return <h3 className='break-words font-semibold'>{children}</h3>;
 }
 
 function ProjectCardStatus({ status }: { status: ProjectStatus }) {
   const { label, variant } = statusConfig[status];
-  return <Badge variant={variant}>{label}</Badge>;
+  // 제목이 여러 줄로 늘어나도 배지 크기가 변하지 않도록 축소/줄바꿈을 막는다.
+  return (
+    <Badge variant={variant} className='shrink-0 whitespace-nowrap'>
+      {label}
+    </Badge>
+  );
 }
 
 function ProjectCardProgress({ value }: { value: number }) {

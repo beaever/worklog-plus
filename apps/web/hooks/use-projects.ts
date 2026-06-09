@@ -50,7 +50,7 @@ export function useProjects(params: ProjectListParams = {}) {
 
       let query = supabase
         .from('projects')
-        .select('id, name, status, updated_at, worklogs(count)', {
+        .select('id, name, status, updated_at, owner_id, worklogs(count)', {
           count: 'exact',
         })
         .order('updated_at', { ascending: false })
@@ -69,6 +69,7 @@ export function useProjects(params: ProjectListParams = {}) {
           name: row.name,
           status: row.status as ProjectStatus,
           updatedAt: row.updated_at,
+          ownerId: row.owner_id,
           progress: progressFromStatus(row.status),
           worklogCount: worklogs?.[0]?.count ?? 0,
         };

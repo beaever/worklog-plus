@@ -46,16 +46,17 @@ export default function ProjectsPage() {
     return matchesSearch;
   });
 
+  // await로 생성 완료까지 폼의 로딩 상태("생성 중...")를 유지하고, 성공 후에만 모달이 닫히게 한다.
   const handleCreateProject = async (data: CreateProjectInput) => {
-    createProjectMutation.mutate(data, {
-      onSuccess: () => {
-        setIsCreateModalOpen(false);
-        toast.success('프로젝트가 생성되었습니다');
-      },
-      onError: (error) => {
-        toast.error(error.message || '프로젝트 생성에 실패했습니다');
-      },
-    });
+    try {
+      await createProjectMutation.mutateAsync(data);
+      toast.success('프로젝트가 생성되었습니다');
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : '프로젝트 생성에 실패했습니다',
+      );
+      throw error; // 실패 시 모달을 닫지 않도록 폼으로 에러를 전파한다.
+    }
   };
 
   if (isLoading) {

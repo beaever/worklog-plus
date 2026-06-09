@@ -14,7 +14,7 @@ export interface Project {
 
 export interface ProjectSummary extends Pick<
   Project,
-  'id' | 'name' | 'status' | 'updatedAt'
+  'id' | 'name' | 'status' | 'updatedAt' | 'ownerId'
 > {
   progress: number;
   worklogCount: number;
