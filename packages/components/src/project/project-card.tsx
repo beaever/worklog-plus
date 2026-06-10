@@ -62,10 +62,10 @@ function ProjectCardIcon() {
 }
 
 function ProjectCardTitle({ children }: { children?: React.ReactNode }) {
-  // 제목은 최대 2줄까지만 노출(초과 시 …). 1줄이어도 2줄 높이를 차지하게 해
-  // 카드 간 높이를 동일하게 맞춘다.
+  // 제목은 항상 정확히 2줄 높이(2lh)를 차지하고 최대 2줄까지만 노출(초과 시 …).
+  // 1줄/2줄 프로젝트의 카드 스타일을 동일하게 맞춘다.
   return (
-    <h3 className='line-clamp-2 min-h-[2.75rem] break-words text-base font-semibold leading-snug'>
+    <h3 className='line-clamp-2 h-[2lh] break-words text-base font-semibold leading-snug'>
       {children}
     </h3>
   );
