@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Button, Badge } from '@worklog-plus/ui';
+import { Button } from '@worklog-plus/ui';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
 import type { ProjectStatus, UpdateProjectInput } from '@worklog-plus/types';
 import { ProjectKPICards } from '@/components/project/project-kpi-cards';
 import { ProjectProgress } from '@/components/project/project-progress';
+import { ProjectStatusSelect } from '@/components/project/project-status-select';
 import { ProjectTimeline } from '@/components/project/project-timeline';
 import { ProjectActivityLog } from '@/components/project/project-activity-log';
 import { ProjectFormModal } from '@/components/project/project-form-modal';
@@ -20,15 +21,6 @@ import {
 } from '@/hooks/use-projects';
 import { toast } from 'sonner';
 
-const statusConfig: Record<
-  ProjectStatus,
-  { label: string; variant: 'default' | 'secondary' | 'outline' }
-> = {
-  PLANNED: { label: '예정', variant: 'secondary' },
-  ACTIVE: { label: '진행중', variant: 'default' },
-  DONE: { label: '완료', variant: 'outline' },
-};
-
 export default function ProjectDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -41,6 +33,7 @@ export default function ProjectDetailPage() {
     data: activitiesData,
     fetchNextPage,
     hasNextPage,
+    isFetchingNextPage,
     isLoading: isLoadingActivities,
   } = useProjectActivities(projectId);
 
@@ -61,8 +54,6 @@ export default function ProjectDetailPage() {
     );
   }
 
-  const { label, variant } = statusConfig[project.status];
-
   const activities =
     activitiesData?.pages.flatMap((page) => page?.data || []) || [];
   const kpi = dashboard?.kpi;
@@ -80,6 +71,19 @@ export default function ProjectDetailPage() {
         onError: (error) => {
           toast.error(error.message || '프로젝트 수정에 실패했습니다');
         },
+      },
+    );
+  };
+
+  // 프로젝트 홈에서 상태를 바로 변경(모달 없이). 같은 값이면 무시.
+  const handleStatusChange = (status: ProjectStatus) => {
+    if (status === project.status) return;
+    updateProjectMutation.mutate(
+      { id: projectId, data: { status } },
+      {
+        onSuccess: () => toast.success('상태가 변경되었습니다'),
+        onError: (error) =>
+          toast.error(error.message || '상태 변경에 실패했습니다'),
       },
     );
   };
@@ -110,7 +114,11 @@ export default function ProjectDetailPage() {
           </button>
           <div className='flex items-center gap-3'>
             <h1 className='text-3xl font-bold'>{project.name}</h1>
-            <Badge variant={variant}>{label}</Badge>
+            <ProjectStatusSelect
+              value={project.status}
+              onChange={handleStatusChange}
+              disabled={updateProjectMutation.isPending}
+            />
           </div>
           {project.description && (
             <p className='text-muted-foreground'>{project.description}</p>
@@ -146,6 +154,7 @@ export default function ProjectDetailPage() {
         activities={activities}
         hasMore={hasNextPage || false}
         onLoadMore={() => fetchNextPage()}
+        isLoading={isFetchingNextPage}
       />
 
       {/* Edit Modal */}

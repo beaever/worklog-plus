@@ -63,6 +63,7 @@ export async function POST(request: Request) {
       status: input.status,
       start_date: input.startDate,
       end_date: input.endDate ?? null,
+      estimated_hours: input.estimatedHours ?? null,
       owner_id: user.id,
     })
     .select('*')

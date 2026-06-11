@@ -54,6 +54,9 @@ export function ProjectFormModal({
     project?.startDate ?? new Date().toISOString().split('T')[0],
   );
   const [endDate, setEndDate] = useState(project?.endDate ?? '');
+  const [estimatedHours, setEstimatedHours] = useState(
+    project?.estimatedHours != null ? String(project.estimatedHours) : '',
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -82,6 +85,13 @@ export function ProjectFormModal({
       newErrors.endDate = '종료일은 시작일 이후여야 합니다';
     }
 
+    if (estimatedHours.trim() !== '') {
+      const n = Number(estimatedHours);
+      if (!Number.isInteger(n) || n <= 0) {
+        newErrors.estimatedHours = '예상 공수는 1 이상의 정수로 입력해주세요';
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -91,6 +101,10 @@ export function ProjectFormModal({
 
     if (!validate()) return;
 
+    // 빈 문자열이면 undefined(미설정), 값이 있으면 정수로 변환
+    const parsedEstimate =
+      estimatedHours.trim() === '' ? undefined : Number(estimatedHours);
+
     setIsLoading(true);
     try {
       if (isEdit) {
@@ -99,6 +113,7 @@ export function ProjectFormModal({
           description: description.trim() || undefined,
           status,
           endDate: endDate || undefined,
+          estimatedHours: parsedEstimate,
         } as UpdateProjectInput);
       } else {
         await onSubmit({
@@ -107,6 +122,7 @@ export function ProjectFormModal({
           status,
           startDate,
           endDate: endDate || undefined,
+          estimatedHours: parsedEstimate,
         } as CreateProjectInput);
       }
       onOpenChange(false);
@@ -126,6 +142,9 @@ export function ProjectFormModal({
         project?.startDate ?? new Date().toISOString().split('T')[0],
       );
       setEndDate(project?.endDate ?? '');
+      setEstimatedHours(
+        project?.estimatedHours != null ? String(project.estimatedHours) : '',
+      );
       setErrors({});
     }
     onOpenChange(newOpen);
@@ -209,6 +228,25 @@ export function ProjectFormModal({
                 <p className='text-sm text-destructive'>{endDateError}</p>
               )}
             </div>
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='estimatedHours'>예상 공수 (시간)</Label>
+            <Input
+              id='estimatedHours'
+              type='number'
+              min={1}
+              step={1}
+              value={estimatedHours}
+              onChange={(e) => setEstimatedHours(e.target.value)}
+              placeholder='예: 120'
+            />
+            <p className='text-xs text-muted-foreground'>
+              누적 업무일지 시간 대비 진행률을 계산하는 기준입니다. 비워두면 진행률이 표시되지 않습니다.
+            </p>
+            {errors.estimatedHours && (
+              <p className='text-sm text-destructive'>{errors.estimatedHours}</p>
+            )}
           </div>
 
           <ResponsiveModal.Footer>

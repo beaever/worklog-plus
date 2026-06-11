@@ -14,7 +14,7 @@ interface StatCardProps {
   };
 }
 
-export function StatCard({ title, value, description: _description, icon, trend }: StatCardProps) {
+export function StatCard({ title, value, description, icon, trend }: StatCardProps) {
   return (
     <StatCardCompound>
       <StatCardCompound.Header>
@@ -22,9 +22,10 @@ export function StatCard({ title, value, description: _description, icon, trend 
         <StatCardCompound.Icon icon={icon} />
       </StatCardCompound.Header>
       <StatCardCompound.Value>{value}</StatCardCompound.Value>
-      {trend && (
-        <StatCardCompound.Trend value={trend.isPositive ? trend.value : -trend.value} />
-      )}
+      <StatCardCompound.Footer
+        trend={trend ? (trend.isPositive ? trend.value : -trend.value) : undefined}
+        description={description}
+      />
     </StatCardCompound>
   );
 }

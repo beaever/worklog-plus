@@ -12,11 +12,17 @@ import type {
   Project,
   ProjectStatus,
   ProjectSummary,
+  ProjectDashboard,
+  ActivityLog,
   PaginationMeta,
   Database,
 } from '@worklog-plus/types';
 import { createClient } from '@/lib/supabase/client';
-import { mapProject, progressFromStatus } from '@/lib/supabase/mappers';
+import {
+  mapProject,
+  computeProjectProgress,
+  timelineTypeFromAction,
+} from '@/lib/supabase/mappers';
 
 export interface ProjectListParams {
   page?: number;
@@ -50,9 +56,10 @@ export function useProjects(params: ProjectListParams = {}) {
 
       let query = supabase
         .from('projects')
-        .select('id, name, status, updated_at, owner_id, worklogs(count)', {
-          count: 'exact',
-        })
+        .select(
+          'id, name, status, updated_at, owner_id, start_date, end_date, estimated_hours, worklogs(duration)',
+          { count: 'exact' },
+        )
         .order('updated_at', { ascending: false })
         .range(from, to);
 
@@ -63,15 +70,24 @@ export function useProjects(params: ProjectListParams = {}) {
       if (error) throw new Error(error.message);
 
       const items: ProjectSummary[] = (data ?? []).map((row) => {
-        const worklogs = row.worklogs as unknown as Array<{ count: number }>;
+        const worklogs = row.worklogs as unknown as Array<{ duration: number }>;
+        const loggedHours = worklogs.reduce((acc, w) => acc + (w.duration ?? 0), 0);
+        const progress = computeProjectProgress({
+          status: row.status,
+          startDate: row.start_date,
+          endDate: row.end_date,
+          estimatedHours: row.estimated_hours,
+          loggedHours,
+        });
         return {
           id: row.id,
           name: row.name,
           status: row.status as ProjectStatus,
           updatedAt: row.updated_at,
           ownerId: row.owner_id,
-          progress: progressFromStatus(row.status),
-          worklogCount: worklogs?.[0]?.count ?? 0,
+          // 카드 막대는 단일 수치만 표시 → 예상 공수 미설정 시 0%
+          progress: progress.percentage ?? 0,
+          worklogCount: worklogs.length,
         };
       });
 
@@ -100,29 +116,115 @@ export function useProject(id: string) {
   });
 }
 
-// 프로젝트 대시보드 — 현재 데이터 모델에 'task' 개념이 없어 KPI는 비워 둔다.
-// (기존에도 백엔드 미구현으로 빈 상태였음. 페이지는 kpi/progress가 falsy면 해당 섹션을 렌더하지 않음)
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+// 프로젝트 대시보드 — KPI/진행률을 업무일지(worklogs) 기반 실데이터로 산출한다.
+// (진행률=예상 공수 대비 누적 시간 + 일정 건강도, 타임라인은 activity_logs. 모두 RLS 범위 내 조회)
 export function useProjectDashboard(id: string) {
   return useQuery({
     queryKey: ['projects', id, 'dashboard'],
-    queryFn: async () => ({
-      projectId: id,
-      kpi: null,
-      progress: null,
-      timeline: [],
-      recentActivities: [],
-    }),
+    queryFn: async (): Promise<ProjectDashboard> => {
+      const supabase = createClient();
+      const [projectRes, worklogsRes, memberRes, logsRes] = await Promise.all([
+        supabase
+          .from('projects')
+          .select('status, start_date, end_date, estimated_hours')
+          .eq('id', id)
+          .single(),
+        supabase.from('worklogs').select('date, duration').eq('project_id', id),
+        supabase
+          .from('project_members')
+          .select('*', { count: 'exact', head: true })
+          .eq('project_id', id),
+        supabase
+          .from('activity_logs')
+          .select('id, action, description, created_at')
+          .eq('project_id', id)
+          .order('created_at', { ascending: false })
+          .limit(10),
+      ]);
+
+      const worklogs = (worklogsRes.data ?? []) as Array<{
+        date: string;
+        duration: number;
+      }>;
+      const weekAgo = new Date(Date.now() - WEEK_MS).toISOString().slice(0, 10);
+      const totalHours = worklogs.reduce((acc, w) => acc + (w.duration ?? 0), 0);
+
+      const project = projectRes.data;
+      const progress = computeProjectProgress({
+        status: project?.status ?? 'PLANNED',
+        startDate: project?.start_date ?? new Date().toISOString().slice(0, 10),
+        endDate: project?.end_date ?? null,
+        estimatedHours: project?.estimated_hours ?? null,
+        loggedHours: totalHours,
+      });
+
+      return {
+        projectId: id,
+        kpi: {
+          totalWorklogs: worklogs.length,
+          totalHours,
+          thisWeekWorklogs: worklogs.filter((w) => w.date >= weekAgo).length,
+          memberCount: memberRes.count ?? 0,
+        },
+        progress,
+        timeline: (logsRes.data ?? []).map((row) => ({
+          id: row.id as string,
+          type: timelineTypeFromAction(row.action as string),
+          description: row.description as string,
+          createdAt: row.created_at as string,
+        })),
+        recentActivities: [],
+      };
+    },
     enabled: !!id,
     staleTime: 60 * 1000,
   });
 }
 
-// 프로젝트 활동 로그 — 활동 피드는 후속 단계에서 제공(현재 빈 목록 유지).
+const ACTIVITIES_PAGE_SIZE = 20;
+
+// 프로젝트 활동 로그 — activity_logs를 페이지네이션으로 조회(RLS 적용).
 export function useProjectActivities(id: string) {
   return useInfiniteQuery({
     queryKey: ['projects', id, 'activities'],
-    queryFn: async () => ({ data: [], meta: buildMeta(0, 1, 20) }),
-    getNextPageParam: () => undefined,
+    queryFn: async ({ pageParam }) => {
+      const supabase = createClient();
+      const from = (pageParam - 1) * ACTIVITIES_PAGE_SIZE;
+      const to = from + ACTIVITIES_PAGE_SIZE - 1;
+
+      const { data, count, error } = await supabase
+        .from('activity_logs')
+        .select('id, description, created_at, user_id, users(name)', {
+          count: 'exact',
+        })
+        .eq('project_id', id)
+        .order('created_at', { ascending: false })
+        .range(from, to);
+      if (error) throw new Error(error.message);
+
+      const items: ActivityLog[] = (data ?? []).map((row) => {
+        const actor = row.users as unknown as { name: string } | null;
+        return {
+          id: row.id as string,
+          // ProjectActivityLog가 "{이름}님이 {action}" 형태로 렌더 → 사람이 읽는 설명을 넣는다.
+          action: row.description as string,
+          actor: {
+            id: (row.user_id as string | null) ?? '',
+            name: actor?.name ?? '알 수 없음',
+          },
+          createdAt: row.created_at as string,
+        };
+      });
+
+      return {
+        data: items,
+        meta: buildMeta(count ?? items.length, pageParam, ACTIVITIES_PAGE_SIZE),
+      };
+    },
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.hasNext ? lastPage.meta.page + 1 : undefined,
     initialPageParam: 1,
     enabled: !!id,
     staleTime: 30 * 1000,
@@ -170,6 +272,9 @@ export function useUpdateProject() {
       if (data.description !== undefined) patch.description = data.description;
       if (data.status !== undefined) patch.status = data.status;
       if (data.endDate !== undefined) patch.end_date = data.endDate;
+      if (data.estimatedHours !== undefined) {
+        patch.estimated_hours = data.estimatedHours;
+      }
 
       const { data: updated, error } = await supabase
         .from('projects')

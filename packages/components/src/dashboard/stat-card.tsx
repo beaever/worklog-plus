@@ -38,22 +38,45 @@ function StatCardValue({ children }: { children?: React.ReactNode }) {
   );
 }
 
-function StatCardTrend({ value }: { value: number }) {
+function trendDisplay(value: number): { text: string; colorClass: string } {
   const isPositive = value > 0;
   const isZero = value === 0;
+  return {
+    text: isPositive ? `+${value}%` : isZero ? '0%' : `${value}%`,
+    colorClass: isZero
+      ? 'text-muted-foreground'
+      : isPositive
+        ? 'text-green-600'
+        : 'text-red-600',
+  };
+}
 
-  const colorClass = isZero
-    ? 'text-muted-foreground'
-    : isPositive
-      ? 'text-green-600'
-      : 'text-red-600';
-
-  const display = isPositive ? `+${value}%` : isZero ? '0%' : `${value}%`;
-
+function StatCardTrend({ value }: { value: number }) {
+  const { text, colorClass } = trendDisplay(value);
   return (
     <p className='text-xs text-muted-foreground'>
-      <span className={colorClass}>{display}</span>
+      <span className={colorClass}>{text}</span>
     </p>
+  );
+}
+
+// 모든 카드가 동일한 높이를 갖도록 trend 유무와 무관하게 항상 렌더되는 푸터 행.
+// trend가 있으면 변화율을, description이 있으면 설명을 한 줄에 함께 표시한다.
+function StatCardFooter({
+  trend,
+  description,
+}: {
+  trend?: number | undefined;
+  description?: string | undefined;
+}) {
+  const trendInfo = trend !== undefined ? trendDisplay(trend) : null;
+  return (
+    <CardContent className='pt-0'>
+      <div className='flex min-h-5 items-center gap-1.5 text-xs text-muted-foreground'>
+        {trendInfo && <span className={trendInfo.colorClass}>{trendInfo.text}</span>}
+        {description && <span>{description}</span>}
+      </div>
+    </CardContent>
   );
 }
 
@@ -64,4 +87,5 @@ export const StatCard = Object.assign(StatCardRoot, {
   Label: StatCardLabel,
   Value: StatCardValue,
   Trend: StatCardTrend,
+  Footer: StatCardFooter,
 });
