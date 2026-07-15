@@ -1,70 +1,82 @@
 # WorkLog+ 📊
 
-> 엔터프라이즈급 업무일지 관리 시스템 - Full-Stack TypeScript Monorepo
+> 개인의 업무일지가 그대로 팀의 진척 리포트가 되는 업무 기록 도구
 
 [![CI/CD](https://github.com/beaever/worklog-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/beaever/worklog-plus/actions)
 [![Chromatic](https://github.com/beaever/worklog-plus/actions/workflows/chromatic.yml/badge.svg)](https://github.com/beaever/worklog-plus/actions/workflows/chromatic.yml)
 
+**데모**: https://worklog-plus.vercel.app/
+
 ## 🎯 프로젝트 개요
 
-**WorkLog+**는 개발자와 팀을 위한 현대적인 업무일지 관리 시스템입니다. 프로젝트 관리, 업무 기록, 대시보드 분석 기능을 제공하며, 웹과 모바일 환경을 모두 지원하는 크로스 플랫폼 애플리케이션입니다.
+**WorkLog+**는 개발자와 팀을 위한 업무일지 관리 도구입니다. 프로젝트 관리, 업무 기록, 대시보드 분석을 제공하며 웹과 모바일을 함께 지원합니다.
+
+이 저장소는 **Express + Prisma 3-tier 구조로 시작했다가 Supabase 기반으로 전면 이전하며 백엔드 서버를 제거한** 이력을 가지고 있습니다. 현재 백엔드는 Supabase(Postgres + Auth + RLS + RPC)이며, 별도의 API 서버는 존재하지 않습니다. 마이그레이션의 배경과 판단은 [핵심 설계 판단](#-핵심-설계-판단)에 정리했습니다.
 
 ### 주요 기능
 
-- ✅ **프로젝트 관리**: 프로젝트 생성, 수정, 삭제 및 상태 관리
-- ✅ **업무일지 작성**: 마크다운 기반 업무 기록 및 관리
-- ✅ **대시보드**: 주간 활동, 프로젝트 분포, 월간 트렌드 시각화
-- ✅ **인증 시스템**: JWT 기반 로그인/회원가입, 자동 토큰 갱신
-- ✅ **반응형 UI**: 데스크톱, 태블릿, 모바일 완벽 지원
-- ✅ **실시간 데이터**: TanStack Query 기반 캐싱 및 자동 갱신
+- **프로젝트 관리**: 생성/수정/삭제, 인라인 상태 변경, 공수 기반 진행률 산정
+- **업무일지 작성**: 마크다운 기반 기록 및 관리
+- **대시보드**: 주간 활동, 프로젝트 분포, 월간 트렌드 시각화
+- **인증**: Supabase Auth 기반 로그인/회원가입, 역할(role) 기반 권한
+- **반응형 UI**: 데스크톱/태블릿/모바일 지원
+- **서버 상태 관리**: TanStack Query 기반 캐싱 및 자동 갱신
 
 ### 개발 기간 & 인원
 
-- **기간**: 2026년 1월 - 2026년 2월 (약 2개월)
-- **인원**: 1명 (Full-Stack 개발)
+- **기간**: 2026년 2월 ~ 2026년 6월
+- **인원**: 1명
 
 ---
 
 ## 🏗️ 기술 스택
 
-### Frontend
+### Web
 
-| 분류              | 기술                | 버전   | 사용 목적                                  |
-| ----------------- | ------------------- | ------ | ------------------------------------------ |
-| **Framework**     | Next.js             | 15.1.x | React 기반 웹 프레임워크 (App Router, SSR) |
-| **Mobile**        | React Native + Expo | 0.76.x | 크로스 플랫폼 모바일 앱 (WebView)          |
-| **Language**      | TypeScript          | 5.7.x  | 타입 안전성 보장 (strict mode)             |
-| **State**         | Zustand             | 5.x    | 경량 전역 상태 관리                        |
-| **Data Fetching** | TanStack Query      | 5.62.x | 서버 상태 관리 및 캐싱                     |
-| **Styling**       | Tailwind CSS        | 3.4.x  | 유틸리티 기반 스타일링                     |
-| **UI Library**    | shadcn/ui           | -      | 접근성 높은 컴포넌트                       |
-| **Form**          | React Hook Form     | 7.71.x | 폼 상태 관리                               |
-| **Validation**    | Zod                 | 3.22.x | 스키마 검증                                |
-| **Charts**        | Recharts            | 2.15.x | 데이터 시각화                              |
+| 분류              | 기술            | 버전   | 사용 목적                      |
+| ----------------- | --------------- | ------ | ------------------------------ |
+| **Framework**     | Next.js         | 15.1.x | App Router 기반 웹 프레임워크  |
+| **Language**      | TypeScript      | 5.7.x  | 타입 안전성 보장 (strict mode) |
+| **UI**            | React           | 19.x   | -                              |
+| **State**         | Zustand         | 5.x    | 경량 전역 상태 관리            |
+| **Data Fetching** | TanStack Query  | 5.62.x | 서버 상태 관리 및 캐싱         |
+| **Styling**       | Tailwind CSS    | 3.4.x  | 유틸리티 기반 스타일링         |
+| **UI Library**    | shadcn/ui       | -      | 접근성 높은 컴포넌트           |
+| **Form**          | React Hook Form | 7.71.x | 폼 상태 관리                   |
+| **Validation**    | Zod             | 3.22.x | 스키마 검증 (`packages/types`) |
+| **Charts**        | Recharts        | 2.15.x | 데이터 시각화                  |
+| **Markdown**      | react-markdown  | 10.x   | 업무일지 렌더링 (remark-gfm)   |
+| **Toast**         | sonner          | 2.x    | 알림                           |
+| **Theme**         | next-themes     | 0.4.x  | 다크 모드                      |
 
-### Backend
+### Mobile
 
-| 분류               | 기술       | 버전   | 사용 목적           |
-| ------------------ | ---------- | ------ | ------------------- |
-| **Runtime**        | Node.js    | 20.x   | JavaScript 런타임   |
-| **Framework**      | Express    | 4.18.x | RESTful API 서버    |
-| **Database**       | PostgreSQL | -      | 관계형 데이터베이스 |
-| **ORM**            | Prisma     | 5.8.x  | 타입 안전 DB 쿼리   |
-| **Authentication** | JWT        | 9.0.x  | 토큰 기반 인증      |
-| **Password**       | bcrypt     | 5.1.x  | 비밀번호 해싱       |
-| **Security**       | Helmet     | 7.1.x  | HTTP 헤더 보안      |
+| 분류         | 기술         | 버전    | 사용 목적               |
+| ------------ | ------------ | ------- | ----------------------- |
+| **Runtime**  | Expo         | ~52.0.0 | 크로스 플랫폼 개발 환경 |
+| **Platform** | React Native | 0.76.x  | WebView 기반 모바일 셸  |
+
+### Backend (Supabase)
+
+| 분류               | 기술                     | 사용 목적                     |
+| ------------------ | ------------------------ | ----------------------------- |
+| **Database**       | PostgreSQL (Supabase)    | 관계형 데이터베이스           |
+| **Authentication** | Supabase Auth            | 인증 및 세션 관리             |
+| **Authorization**  | Row Level Security (RLS) | DB 레벨 선언적 권한 제어      |
+| **Aggregation**    | Postgres RPC             | 대시보드 집계 (`*_stats_rpc`) |
+| **Client**         | `@supabase/ssr`          | SSR/CSR 양쪽의 세션 처리      |
 
 ### DevOps & Tools
 
-| 분류                | 기술             | 사용 목적               |
-| ------------------- | ---------------- | ----------------------- |
-| **Monorepo**        | Turborepo        | 빌드 최적화 및 캐싱     |
-| **Package Manager** | pnpm             | 빠른 의존성 설치        |
-| **Testing**         | Vitest           | 단위 테스트 및 커버리지 |
-| **CI/CD**           | GitHub Actions   | 자동화된 빌드 및 배포   |
-| **Code Quality**    | ESLint, Prettier | 코드 품질 관리          |
-| **Component Dev**   | Storybook        | UI 컴포넌트 개발        |
-| **Deployment**      | Railway          | 백엔드 배포             |
+| 분류                | 기술                     | 사용 목적             |
+| ------------------- | ------------------------ | --------------------- |
+| **Monorepo**        | Turborepo                | 빌드 최적화 및 캐싱   |
+| **Package Manager** | pnpm 9.15.0              | 의존성 설치           |
+| **Testing**         | Vitest + Testing Library | 단위/컴포넌트 테스트  |
+| **CI/CD**           | GitHub Actions           | 자동화된 검사 및 배포 |
+| **Code Quality**    | ESLint, Prettier         | 코드 품질 관리        |
+| **Component Dev**   | Storybook, Chromatic     | UI 컴포넌트 개발/리뷰 |
+| **Deployment**      | Vercel                   | 웹 배포               |
 
 ---
 
@@ -74,18 +86,21 @@
 worklog-plus/
 ├── apps/
 │   ├── web/              # Next.js 15 웹 애플리케이션
-│   ├── mobile/           # React Native + Expo 모바일 앱
-│   ├── backend/          # Express API 서버
+│   ├── mobile/           # React Native + Expo 모바일 앱 (WebView)
 │   └── storybook/        # UI 컴포넌트 문서화
 │
 ├── packages/
 │   ├── ui/               # shadcn/ui 기반 공용 컴포넌트
 │   ├── components/       # 도메인 컴포넌트 (프로젝트, 업무일지 등)
-│   ├── api/              # 타입 안전한 API 클라이언트
 │   ├── store/            # Zustand 전역 상태
 │   ├── hooks/            # 공용 커스텀 훅
 │   ├── types/            # 공용 타입 + Zod 스키마
 │   └── config/           # ESLint, TypeScript 설정
+│
+├── supabase/
+│   ├── config.toml       # 로컬 스택 설정 (Custom Access Token Hook 포함)
+│   ├── migrations/       # 스키마 / 함수 / RLS 정책 / 집계 RPC
+│   └── seed.sql          # 데모 데이터
 │
 ├── .github/workflows/    # CI/CD 워크플로우
 ├── turbo.json
@@ -93,21 +108,21 @@ worklog-plus/
 └── package.json
 ```
 
-### 의존성 그래프
+Supabase 스키마와 정책의 상세 설명은 [`supabase/README.md`](./supabase/README.md)를 참고하세요.
 
-프로젝트의 패키지 간 의존성 관계를 시각화하려면:
+### 의존성 그래프
 
 ```bash
 pnpm graph
 ```
 
-이 명령어는 `graph.html` 파일을 생성하며, 브라우저에서 열어 Turborepo 태스크 의존성을 확인할 수 있습니다.
+`graph.html`이 생성되며, 브라우저에서 Turborepo 태스크 의존성을 확인할 수 있습니다.
 
 **주요 의존성 규칙:**
 
 - `apps` → `packages` (단방향)
 - `packages` 간 순환 의존 금지
-- `ui`, `api`, `store`, `components` → `types`
+- `ui`, `store`, `components` → `types`
 - `hooks` → 독립적 (의존성 없음)
 
 ---
@@ -117,210 +132,106 @@ pnpm graph
 ### 요구사항
 
 - **Node.js** >= 20
-- **pnpm** >= 9
-- **PostgreSQL** (백엔드 실행 시)
+- **pnpm** 9.15.0 (`packageManager` 필드로 고정)
+- **Docker** (로컬 Supabase 스택 실행 시)
 
 ### 설치
 
 ```bash
-# 저장소 클론
 git clone https://github.com/beaever/worklog-plus.git
 cd worklog-plus
-
-# 의존성 설치
 pnpm install
-
-# Prisma Client 생성 (백엔드)
-pnpm --filter @worklog-plus/backend exec prisma generate
 ```
+
+### 로컬 Supabase 실행
+
+```bash
+npx supabase start      # 로컬 스택 기동 (Docker 필요)
+npx supabase db reset   # 마이그레이션 + seed 재적용
+npx supabase status     # URL / 키 확인
+```
+
+스튜디오는 http://127.0.0.1:54323 에서 열립니다. seed 계정은 [`supabase/README.md`](./supabase/README.md)에 정리되어 있습니다.
 
 ### 환경 변수 설정
 
-#### Web (.env.local)
+각 앱의 `.env.example`을 복사해 사용하세요.
+
+#### Web (`apps/web/.env.local`)
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8080/api
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<supabase status 의 anon key>
+SUPABASE_SERVICE_ROLE_KEY=<supabase status 의 service_role key>
 ```
 
-#### Mobile (.env)
+> `SUPABASE_SERVICE_ROLE_KEY`는 RLS를 우회하므로 서버 사이드에서만 사용하며, 클라이언트에 노출되면 안 됩니다.
+
+#### Mobile (`apps/mobile/.env`)
 
 ```env
 EXPO_PUBLIC_WEB_URL=http://localhost:3000
-EXPO_PUBLIC_ENV=development
-```
-
-#### Backend (.env)
-
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/worklog
-JWT_SECRET=your-jwt-secret
-JWT_REFRESH_SECRET=your-refresh-secret
-NODE_ENV=development
+EXPO_PUBLIC_PRODUCTION_URL=https://worklog-plus.vercel.app
 ```
 
 ### 개발 서버 실행
 
 ```bash
-# 전체 개발 서버 실행
-pnpm dev
-
-# Web만 실행
-pnpm dev:web
-
-# Mobile만 실행
-pnpm dev:mobile
-
-# Backend만 실행
-pnpm --filter @worklog-plus/backend dev
-
-# Storybook 실행
-pnpm storybook
+pnpm dev            # 전체 개발 서버
+pnpm dev:web        # Web만
+pnpm dev:mobile     # Mobile만
+pnpm dev:mobile:ios # Mobile (iOS 시뮬레이터)
+pnpm storybook      # Storybook
 ```
 
 ### 빌드
 
 ```bash
-# 전체 빌드
-pnpm build
-
-# Web만 빌드
-pnpm build:web
-
-# Backend만 빌드
-pnpm --filter @worklog-plus/backend build
-```
-
-### 테스트
-
-```bash
-# 전체 테스트 실행
-pnpm test
-
-# 테스트 watch 모드
-pnpm test:watch
-
-# 커버리지 리포트
-pnpm test:coverage
+pnpm build       # 전체 빌드
+pnpm build:web   # Web만
 ```
 
 ---
 
-## 💡 핵심 구현 사항
+## 💡 핵심 설계 판단
 
-### 1. Monorepo 아키텍처
+### 1. Express + Prisma → Supabase 전면 이전
 
-**선택 이유:**
+**배경:** 초기에는 Express + Prisma + PostgreSQL 3-tier 구조였습니다. 1인 개발 규모에서 API 서버는 CRUD를 DB로 넘기는 얇은 통과 계층에 가까웠고, 인증 토큰 관리와 배포 대상이 늘어나는 비용만 남았습니다.
 
-- 코드 재사용성 극대화 (UI, Types, API 공유)
-- 일관된 개발 환경 및 의존성 관리
-- 효율적인 빌드 파이프라인 (Turborepo 캐싱)
+**판단:** 백엔드 서버를 유지하는 대신 Supabase로 이전해 서버 자체를 제거했습니다. 다만 인증과 데이터를 한 번에 옮기면 실패 시 원인을 가릴 수 없어, **인증 → 데이터 → 정리** 순의 단계로 쪼개 위험을 분리하고 각 단계를 독립 PR로 검증하며 이전했습니다.
 
-**구현:**
+**결과:** `apps/backend`가 제거되고 배포 대상이 Vercel 하나로 줄었습니다. JWT 발급·갱신, bcrypt 해싱, refresh token 테이블 등 직접 관리하던 인증 코드가 사라졌습니다.
 
-- pnpm workspace로 패키지 관리
-- Turborepo로 병렬 빌드 및 캐싱
-- 명확한 의존성 규칙 설정 (순환 의존 방지)
+### 2. 권한 규칙을 애플리케이션에서 RLS로 이관
 
-### 2. 인증 시스템
+**문제:** 권한 규칙이 Express 미들웨어와 서비스 코드 곳곳에 흩어져 있어, 새 엔드포인트를 추가할 때마다 검사를 빠뜨릴 여지가 있었습니다.
 
-**특징:**
+**판단:** 규칙을 선언적 RLS 정책으로 DB에 내려, **애플리케이션이 뚫려도 DB가 막는** 구조로 바꿨습니다.
 
-- Access Token (15분) + Refresh Token (7일) 이중 토큰 전략
-- 401 에러 시 자동 토큰 갱신 및 요청 재시도
-- localStorage와 Cookie 이중 저장 (SSR 지원)
-- Next.js Middleware로 서버 사이드 라우트 보호
+**해결한 난점:** 프로젝트와 멤버 테이블이 서로의 정책을 참조하면서 정책 평가가 무한재귀에 빠졌습니다. 참조 경로를 `SECURITY DEFINER` 헬퍼 함수로 끊어 해결했습니다. 함께 권한상승 차단 트리거를 두어 역할 컬럼의 자가 변경을 막았습니다.
 
-**보안 구현:**
+### 3. Custom Access Token Hook 으로 역할 주입
 
-- CORS 설정으로 허용된 도메인만 접근
-- bcrypt 비밀번호 해싱 (salt rounds: 10)
-- Helmet을 통한 HTTP 헤더 보안
-- Rate Limiting으로 무차별 대입 공격 방지
+**문제:** RLS 정책이 평가될 때마다 사용자의 역할을 확인하려고 users 테이블을 조회했습니다. 정책은 행마다 평가되므로 이 조회가 반복 비용이 됩니다.
 
-### 3. 성능 최적화
+**판단:** Custom Access Token Hook으로 JWT에 역할 claim을 주입해, 정책이 토큰만 보고 판단하도록 바꿨습니다.
 
-**이미지 최적화:**
+**결과:** RLS 평가 시의 사용자 테이블 조회가 제거됐습니다.
 
-- WebP/AVIF 포맷으로 이미지 크기 50% 감소
-- 반응형 이미지로 불필요한 데이터 전송 방지
-- Lazy Loading으로 초기 로딩 속도 개선
+### 4. 대시보드 집계의 N+1 제거
 
-**코드 스플리팅:**
+**문제:** 대시보드의 날짜별 통계를 날짜마다 쿼리를 도는 방식으로 만들어, 기간이 길어질수록 쿼리 수가 선형으로 늘었습니다.
 
-- 페이지별 번들 분리로 초기 로딩 시간 40% 단축
-- 동적 import 활용
-- Skeleton UI로 로딩 경험 개선
+**판단:** `generate_series`로 날짜 축을 DB에서 만들고 단일 `GROUP BY`로 집계하는 RPC(`*_stats_rpc`)로 대체했습니다.
 
-**TanStack Query 캐싱:**
+**결과:** 기간과 무관하게 쿼리 1회로 집계됩니다.
 
-- staleTime 설정으로 불필요한 API 요청 80% 감소
-- Mutation 성공 시 자동 쿼리 무효화
-- 사용자 경험 향상 (즉각적인 데이터 표시)
+### 5. Monorepo 아키텍처
 
-### 4. 에러 처리 시스템
+**선택 이유:** 웹과 모바일, Storybook이 동일한 도메인 컴포넌트와 타입을 공유하므로 코드 재사용과 일관된 의존성 관리가 필요했습니다.
 
-**전역 에러 바운더리:**
-
-- 에러 타입별 맞춤 메시지 (네트워크, 인증, 서버 등)
-- 재시도 버튼으로 사용자 액션 제공
-- 개발 환경에서 상세 스택 트레이스 표시
-
-**API 에러 처리:**
-
-- 구조화된 에러 응답
-- Prisma 에러 자동 변환
-- 사용자 친화적인 에러 메시지
-
----
-
-## 📊 프로젝트 성과
-
-### 코드 품질
-
-- **TypeScript 커버리지**: 100% (strict mode)
-- **ESLint 규칙**: 0 에러
-- **컴포넌트 재사용률**: 85% 이상
-- **테스트 커버리지**: 주요 유틸 함수 100%
-- **빌드 안정성**: 테스트 자동 실행으로 품질 보장
-
-### 개발 생산성
-
-- **빌드 시간**: Turborepo 캐싱으로 70% 단축
-- **Hot Reload**: < 1초
-- **타입 체크**: 병렬 처리로 50% 단축
-
----
-
-## 🔧 주요 도전 과제 및 해결
-
-### 1. Monorepo 의존성 관리
-
-**문제:** 패키지 간 순환 의존성 발생, 빌드 순서 문제로 타입 에러
-
-**해결:** turbo.json으로 명확한 빌드 순서 정의, 의존성 그래프 시각화
-
-**결과:** 빌드 실패율 0%, 개발자 경험 개선
-
-### 2. 인증 토큰 관리
-
-**문제:** SSR 환경에서 localStorage 접근 불가, 토큰 만료 시 UX 저하
-
-**해결:** localStorage + Cookie 이중 저장, 자동 토큰 갱신 로직 구현
-
-**결과:** SSR/CSR 모두 지원, 세션 유지율 95% 이상
-
-### 3. Lint 에러 수정
-
-**문제:** 백엔드 ESLint 설정 누락, TypeScript strict mode 에러 다수 발생
-
-**해결:**
-
-- ESLint 9.x flat config 형식으로 설정 파일 생성
-- 타입 import를 `type` 키워드로 명시적 분리
-- `any` 타입을 `unknown`으로 변경 후 타입 가드 추가
-- 미사용 변수를 `_` prefix로 처리 또는 제거
-
-**결과:** Lint 에러 0개, 타입 안전성 100% 달성
+**구현:** pnpm workspace로 패키지를 관리하고 Turborepo로 병렬 빌드 및 캐싱을 적용했습니다. `apps → packages` 단방향 규칙을 두어 순환 의존을 방지합니다.
 
 ---
 
@@ -328,147 +239,79 @@ pnpm test:coverage
 
 ### 테스트 전략
 
-- **단위 테스트**: Vitest를 사용한 유틸 함수 테스트
-- **커버리지**: v8 provider로 코드 커버리지 측정
-- **자동 실행**: 빌드 시 테스트 자동 실행 (Turbo 파이프라인)
-- **CI/CD**: GitHub Actions에서 자동 테스트 실행
+- **단위/컴포넌트 테스트**: Vitest + Testing Library
+- **커버리지**: v8 provider (`@vitest/coverage-v8`)
+- **CI**: GitHub Actions에서 `pnpm ci`(typecheck → lint → build → test) 실행
+- **비주얼 리뷰**: Storybook + Chromatic
 
 ### 작성된 테스트
 
-**Backend**
+| 위치                                             | 대상                   |
+| ------------------------------------------------ | ---------------------- |
+| `packages/components/src/__tests__/project-card` | 프로젝트 카드 컴포넌트 |
+| `packages/components/src/__tests__/worklog-card` | 업무일지 카드 컴포넌트 |
+| `packages/components/src/__tests__/stat-card`    | 통계 카드 컴포넌트     |
+| `packages/store/src/__tests__/user-store`        | 사용자 전역 상태       |
+| `apps/web/lib/__tests__/utils`                   | 공통 유틸리티 함수     |
 
-- `jwt.test.ts` - JWT 토큰 생성, 검증, 디코딩
-- `password.test.ts` - 비밀번호 해싱 및 검증
-- `pagination.test.ts` - 페이지네이션 로직
-
-**Web**
-
-- `utils.test.ts` - 공통 유틸리티 함수
+> 커버리지는 전 구간이 아닌 위 영역에 한정됩니다. E2E는 아직 없습니다.
 
 ### 테스트 실행
 
 ```bash
-# 전체 테스트 실행
-pnpm test
-
-# 백엔드 테스트만
-pnpm --filter @worklog-plus/backend test
-
-# 웹 테스트만
-pnpm --filter @worklog-plus/web test
-
-# Watch 모드
-pnpm test:watch
-
-# 커버리지 리포트
-pnpm test:coverage
+pnpm test         # 전체 테스트
+pnpm test:watch   # watch 모드
 ```
-
-### 빌드 시 자동 테스트
-
-프로젝트는 **빌드 전에 자동으로 테스트를 실행**하도록 설정되어 있습니다.
-
-```bash
-# build 실행 시 자동으로 test 실행됨
-pnpm build
-```
-
-`turbo.json`의 build task가 test에 의존하도록 설정되어 있어, 테스트가 실패하면 빌드도 실패합니다.
 
 ---
 
 ## 🚢 배포
 
-### Backend (Railway)
+### Web (Vercel)
 
-Railway를 통해 백엔드 API 서버를 배포할 수 있습니다.
+`main` 브랜치 푸시 시 Vercel이 자동 배포합니다. 환경 변수는 Vercel 대시보드에서 설정합니다.
 
-```bash
-# Railway CLI 설치
-npm install -g @railway/cli
-
-# Railway 로그인
-railway login
-
-# 프로젝트 초기화
-railway init
-
-# 배포
-railway up
-```
-
-환경 변수는 Railway 대시보드에서 설정하세요.
-
-### Frontend (Vercel)
+### Database (Supabase)
 
 ```bash
-# Vercel CLI 설치
-npm install -g vercel
-
-# 배포
-vercel
+npx supabase link --project-ref <project-ref>
+npx supabase db push     # 마이그레이션 원격 반영
 ```
 
 ---
 
 ## 스크립트
 
-| 명령어               | 설명                             |
-| -------------------- | -------------------------------- |
-| `pnpm dev`           | 전체 개발 서버 실행              |
-| `pnpm dev:web`       | Web 개발 서버만 실행             |
-| `pnpm dev:mobile`    | Mobile 개발 서버만 실행          |
-| `pnpm build`         | 프로덕션 빌드 (테스트 자동 실행) |
-| `pnpm typecheck`     | TypeScript 타입 검사             |
-| `pnpm lint`          | ESLint 검사                      |
-| `pnpm test`          | 전체 테스트 실행                 |
-| `pnpm test:watch`    | 테스트 watch 모드                |
-| `pnpm test:coverage` | 테스트 커버리지 리포트           |
-| `pnpm format`        | Prettier 포맷팅                  |
-| `pnpm storybook`     | Storybook 실행                   |
-| `pnpm clean`         | 빌드 결과물 삭제                 |
-
----
-
-## 학습 및 성장
-
-### 기술적 성장
-
-1. **Monorepo 아키텍처 설계** - 패키지 분리 전략, Turborepo 최적화
-2. **Next.js 15 App Router** - RSC, Streaming SSR, Middleware
-3. **TanStack Query 고급 활용** - 캐싱 전략, 자동 재시도
-4. **TypeScript 고급 기법** - Generic, Utility Types, 타입 가드
-5. **보안 Best Practices** - JWT, CORS, Rate Limiting, Helmet
-
-### 배운 점
-
-- 초기 아키텍처 설계의 중요성
-- 성능은 처음부터 고려해야 함
-- 타입 안전성의 가치
-- 사용자 경험 우선 사고
-- 테스트 코드의 중요성
+| 명령어                    | 설명                            |
+| ------------------------- | ------------------------------- |
+| `pnpm dev`                | 전체 개발 서버 실행             |
+| `pnpm dev:web`            | Web 개발 서버만 실행            |
+| `pnpm dev:mobile`         | Mobile 개발 서버만 실행         |
+| `pnpm dev:mobile:ios`     | Mobile iOS 시뮬레이터           |
+| `pnpm dev:mobile:android` | Mobile Android 에뮬레이터       |
+| `pnpm build`              | 프로덕션 빌드                   |
+| `pnpm build:web`          | Web만 빌드                      |
+| `pnpm typecheck`          | TypeScript 타입 검사            |
+| `pnpm lint`               | ESLint 검사                     |
+| `pnpm test`               | 전체 테스트 실행                |
+| `pnpm test:watch`         | 테스트 watch 모드               |
+| `pnpm ci`                 | typecheck + lint + build + test |
+| `pnpm format`             | Prettier 포맷팅                 |
+| `pnpm format:check`       | Prettier 검사                   |
+| `pnpm storybook`          | Storybook 실행                  |
+| `pnpm chromatic`          | Chromatic 업로드                |
+| `pnpm graph`              | 의존성 그래프 생성              |
+| `pnpm clean`              | 빌드 결과물 삭제                |
 
 ---
 
 ## 🔮 향후 개선 계획
 
-### 단기 (1개월)
-
 - [ ] E2E 테스트 (Playwright)
 - [ ] 접근성 개선 (WCAG 2.1 AA)
-- [ ] PWA 지원
-
-### 중기 (3개월)
-
-- [ ] 실시간 협업 (WebSocket)
-- [ ] 다국어 지원 (i18n)
+- [ ] 실시간 협업 (Supabase Realtime)
 - [ ] 고급 검색/필터링
-
-### 장기 (6개월)
-
-- [ ] AI 기반 업무 분석
-- [ ] 팀 협업 기능
-- [ ] 모바일 네이티브 앱
+- [ ] 모바일 네이티브 전환 (현재 WebView 셸)
 
 ---
 
@@ -480,9 +323,5 @@ Private
 
 ## 👨‍💻 개발자
 
-**GitHub**: [@beaever](https://github.com/beaever)  
+**GitHub**: [@beaever](https://github.com/beaever)
 **Repository**: [worklog-plus](https://github.com/beaever/worklog-plus)
-
----
-
-**마지막 업데이트**: 2026년 3월
