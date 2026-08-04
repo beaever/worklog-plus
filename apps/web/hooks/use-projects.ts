@@ -43,6 +43,12 @@ function buildMeta(total: number, page: number, limit: number): PaginationMeta {
   };
 }
 
+// PostgREST or() 필터는 콤마로 조건을, 점으로 연산자를 구분한다. 사용자 입력을 그대로 넣으면
+// 콤마·괄호로 조건을 덧붙여 필터를 조작할 수 있어, 값을 큰따옴표로 감싸고 내부의 " 와 \ 만 이스케이프한다.
+export function quoteFilterValue(value: string): string {
+  return `"${value.replace(/["\\]/g, '\\$&')}"`;
+}
+
 // 프로젝트 목록 (RLS가 접근 가능한 프로젝트만 반환). 카드 표시에 맞춰 ProjectSummary로 매핑.
 export function useProjects(params: ProjectListParams = {}) {
   const { page = 1, limit = 10, status, search } = params;
@@ -64,7 +70,10 @@ export function useProjects(params: ProjectListParams = {}) {
         .range(from, to);
 
       if (status) query = query.eq('status', status);
-      if (search) query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+      if (search) {
+        const pattern = quoteFilterValue(`%${search}%`);
+        query = query.or(`name.ilike.${pattern},description.ilike.${pattern}`);
+      }
 
       const { data, count, error } = await query;
       if (error) throw new Error(error.message);
