@@ -17,6 +17,7 @@ import type {
   PaginationMeta,
   Database,
 } from '@worklog-plus/types';
+import { track } from '@vercel/analytics';
 import { createClient } from '@/lib/supabase/client';
 import {
   mapProject,
@@ -258,6 +259,7 @@ export function useCreateProject() {
       return body as Project;
     },
     onSuccess: () => {
+      track('project_created');
       queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });

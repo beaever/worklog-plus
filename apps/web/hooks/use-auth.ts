@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@worklog-plus/store';
 import type { LoginRequest, RegisterRequest } from '@worklog-plus/types';
+import { track } from '@vercel/analytics';
 import { createClient } from '@/lib/supabase/client';
 import { fetchProfileById, fetchCurrentUserProfile } from '@/lib/supabase/profile';
 
@@ -62,6 +63,7 @@ export function useRegister() {
       return profile;
     },
     onSuccess: (user) => {
+      track('signup');
       login(user);
       router.replace('/dashboard');
       router.refresh();

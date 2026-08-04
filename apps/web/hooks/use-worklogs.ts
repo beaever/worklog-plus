@@ -13,6 +13,7 @@ import type {
   PaginationMeta,
   Database,
 } from '@worklog-plus/types';
+import { track } from '@vercel/analytics';
 import { createClient } from '@/lib/supabase/client';
 import { mapWorklog } from '@/lib/supabase/mappers';
 
@@ -128,6 +129,7 @@ export function useCreateWorklog() {
       return mapWorklog(created);
     },
     onSuccess: () => {
+      track('worklog_created');
       queryClient.invalidateQueries({ queryKey: ['worklogs'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       // 진행률이 누적 시간에 의존하므로 프로젝트 목록/대시보드도 갱신

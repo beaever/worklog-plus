@@ -15,9 +15,11 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@sentry/nextjs": "^10.69.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.107.0",
     "@tanstack/react-query": "^5.62.8",
+    "@vercel/analytics": "^2.0.1",
     "@worklog-plus/components": "workspace:*",
     "@worklog-plus/store": "workspace:*",
     "@worklog-plus/types": "workspace:*",
