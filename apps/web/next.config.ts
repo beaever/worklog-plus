@@ -26,7 +26,6 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     '@worklog-plus/components',
     '@worklog-plus/ui',
-    '@worklog-plus/hooks',
     '@worklog-plus/store',
     '@worklog-plus/types',
   ],
