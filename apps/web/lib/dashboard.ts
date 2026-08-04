@@ -67,29 +67,22 @@ export interface WeeklyActivityEntry {
   hours: number;
 }
 
-export async function getWeeklyActivity(supabase: SB, userId: string): Promise<WeeklyActivityEntry[]> {
+// 집계는 worklog_daily_stats RPC(단일 GROUP BY, 빈 날짜 0으로 채움)에 맡긴다.
+// RPC는 auth.uid() 기준이라 세션 사용자의 통계만 반환한다.
+export async function getWeeklyActivity(supabase: SB): Promise<WeeklyActivityEntry[]> {
   const now = new Date();
   const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 6));
-  const { data } = await supabase
-    .from('worklogs')
-    .select('date, duration')
-    .eq('user_id', userId)
-    .gte('date', ymd(start))
-    .lte('date', ymd(now));
-  const rows = (data ?? []) as DurationRow[];
+  const { data } = await supabase.rpc('worklog_daily_stats', {
+    p_from: ymd(start),
+    p_to: ymd(now),
+  });
 
-  const result: WeeklyActivityEntry[] = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - i));
-    const key = ymd(d);
-    const dayRows = rows.filter((r) => r.date === key);
-    result.push({
-      day: WEEKDAY_KO[d.getUTCDay()] ?? '',
-      worklogs: dayRows.length,
-      hours: sumDuration(dayRows),
-    });
-  }
-  return result;
+  return (data ?? []).map((row) => ({
+    // day는 'YYYY-MM-DD' 문자열 → 로컬 타임존 해석을 피하려고 UTC로 파싱한다.
+    day: WEEKDAY_KO[new Date(`${row.day}T00:00:00Z`).getUTCDay()] ?? '',
+    worklogs: row.worklog_count,
+    hours: row.duration_hours,
+  }));
 }
 
 export interface MonthlyTrendEntry {
@@ -98,28 +91,19 @@ export interface MonthlyTrendEntry {
   hours: number;
 }
 
-export async function getMonthlyTrend(supabase: SB, userId: string): Promise<MonthlyTrendEntry[]> {
+export async function getMonthlyTrend(supabase: SB): Promise<MonthlyTrendEntry[]> {
   const now = new Date();
   const startMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 5, 1));
-  const { data } = await supabase
-    .from('worklogs')
-    .select('date, duration')
-    .eq('user_id', userId)
-    .gte('date', ymd(startMonth));
-  const rows = (data ?? []) as DurationRow[];
+  const { data } = await supabase.rpc('worklog_monthly_stats', {
+    p_from: ymd(startMonth),
+    p_to: ymd(now),
+  });
 
-  const result: MonthlyTrendEntry[] = [];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
-    const ym = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
-    const monthRows = rows.filter((r) => r.date.slice(0, 7) === ym);
-    result.push({
-      month: `${d.getUTCMonth() + 1}월`,
-      worklogs: monthRows.length,
-      hours: sumDuration(monthRows),
-    });
-  }
-  return result;
+  return (data ?? []).map((row) => ({
+    month: `${new Date(`${row.month_start}T00:00:00Z`).getUTCMonth() + 1}월`,
+    worklogs: row.worklog_count,
+    hours: row.duration_hours,
+  }));
 }
 
 export interface ProjectDistributionEntry {
@@ -128,12 +112,8 @@ export interface ProjectDistributionEntry {
 }
 
 export async function getProjectDistribution(supabase: SB): Promise<ProjectDistributionEntry[]> {
-  const { data } = await supabase.from('projects').select('name, worklogs(count)');
-  const items = (data ?? []).map((p) => {
-    const worklogs = p.worklogs as unknown as Array<{ count: number }>;
-    return { name: p.name as string, value: worklogs?.[0]?.count ?? 0 };
-  });
-  return items.sort((a, b) => b.value - a.value).slice(0, 5);
+  const { data } = await supabase.rpc('project_worklog_distribution', { p_limit: 5 });
+  return (data ?? []).map((row) => ({ name: row.name, value: row.value }));
 }
 
 export interface RecentWorklogEntry {
