@@ -1,13 +1,10 @@
 name: Chromatic
 
+# 상용화 준비 시점에 자동 트리거를 되살린다. 그때까지는 수동 실행만.
+#   push:         { branches: [main] }
+#   pull_request: { branches: [main] }
 on:
-  push:
-    branches:
-      - main
-  # 시각 회귀 검사는 main에서만 동작. dev 및 dev 타깃 PR에서는 실행하지 않음
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   chromatic:
