@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { withSentryConfig } from '@sentry/nextjs';
 
 /**
  * Next.js 설정
@@ -84,12 +85,15 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react', '@worklog-plus/ui'],
   },
 
-  /**
-   * 번들 분석기 설정
-   * ANALYZE=true 환경 변수로 활성화
-   *
-   * 사용법: ANALYZE=true pnpm build
-   */
 };
 
-export default nextConfig;
+// 소스맵 업로드는 SENTRY_AUTH_TOKEN이 있을 때만 동작한다. 토큰이 없으면 빌드는 그대로 통과하고
+// 에러 스택만 난독화된 상태로 남는다(Vercel 환경변수 설정 후 자동 활성).
+// org/project/authToken은 SENTRY_* 환경변수에서 자동으로 읽는다.
+export default withSentryConfig(nextConfig, {
+  silent: true,
+  // Sentry가 자체 로거 코드를 번들에서 제거해 클라이언트 번들을 줄인다.
+  disableLogger: true,
+  // 광고 차단기에 막히지 않도록 이벤트를 자체 도메인 경유로 보낸다.
+  tunnelRoute: '/monitoring',
+});
