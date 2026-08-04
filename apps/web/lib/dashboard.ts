@@ -21,6 +21,7 @@ export interface StatsResult {
   totalProjects: number;
   activeProjects: number;
   completedProjects: number;
+  totalWorklogs: number;
   weeklyWorklogs: number;
   weeklyWorklogsChange: number;
   totalHours: string;
@@ -37,10 +38,11 @@ export async function getStats(supabase: SB, userId: string): Promise<StatsResul
   const weekStart = new Date(Date.UTC(y, m, now.getUTCDate() - dow));
   const prevWeekStart = new Date(Date.UTC(y, m, now.getUTCDate() - dow - 7));
 
-  const [total, active, done, monthW, weekW, prevW] = await Promise.all([
+  const [total, active, done, totalW, monthW, weekW, prevW] = await Promise.all([
     supabase.from('projects').select('*', { count: 'exact', head: true }),
     supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'ACTIVE'),
     supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'DONE'),
+    supabase.from('worklogs').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     supabase.from('worklogs').select('date, duration').eq('user_id', userId).gte('date', ymd(monthStart)).lte('date', ymd(monthEnd)),
     supabase.from('worklogs').select('date, duration').eq('user_id', userId).gte('date', ymd(weekStart)).lte('date', ymd(now)),
     supabase.from('worklogs').select('date, duration').eq('user_id', userId).gte('date', ymd(prevWeekStart)).lt('date', ymd(weekStart)),
@@ -54,6 +56,7 @@ export async function getStats(supabase: SB, userId: string): Promise<StatsResul
     totalProjects: total.count ?? 0,
     activeProjects: active.count ?? 0,
     completedProjects: done.count ?? 0,
+    totalWorklogs: totalW.count ?? 0,
     weeklyWorklogs: weekRows.length,
     weeklyWorklogsChange: weekRows.length - prevRows.length,
     totalHours: `${sumDuration(monthRows)}h`,

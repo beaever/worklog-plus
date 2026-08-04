@@ -4,6 +4,8 @@
 export interface DashboardStats {
   totalProjects: number;
   activeProjects: number;
+  // 온보딩 체크리스트 판정용 — 기간 필터 없는 전체 일지 수
+  totalWorklogs: number;
   weeklyWorklogs: number;
   weeklyWorklogsChange: number;
   totalHours: string;

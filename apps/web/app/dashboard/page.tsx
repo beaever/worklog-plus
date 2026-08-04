@@ -7,6 +7,7 @@ import { WeeklyActivityChart } from '@/components/dashboard/weekly-activity-char
 import { ProjectDistributionChart } from '@/components/dashboard/project-distribution-chart';
 import { MonthlyTrendChart } from '@/components/dashboard/monthly-trend-chart';
 import { RecentWorklogs } from '@/components/dashboard/recent-worklogs';
+import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist';
 import { useDashboardStats } from '@/hooks/use-dashboard';
 
 export default function DashboardPage() {
@@ -76,6 +77,11 @@ export default function DashboardPage() {
         <h1 className='text-3xl font-bold'>대시보드</h1>
         <p className='text-muted-foreground'>업무 현황을 한눈에 확인하세요</p>
       </div>
+
+      <OnboardingChecklist
+        hasProject={(stats?.totalProjects ?? 0) > 0}
+        hasWorklog={(stats?.totalWorklogs ?? 0) > 0}
+      />
 
       {/* 통계 카드 */}
       <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
