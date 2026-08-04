@@ -17,26 +17,3 @@ export interface User {
 export interface UserProfile extends Pick<User, 'id' | 'name' | 'avatarUrl'> {
   email: string;
 }
-
-export interface UserListItem extends Pick<
-  User,
-  'id' | 'name' | 'email' | 'role' | 'status' | 'createdAt'
-> {
-  avatarUrl?: string;
-}
-
-export interface UpdateUserInput {
-  name?: string;
-  role?: UserRole;
-  status?: UserStatus;
-}
-
-export interface ProjectAccess {
-  projectId: string;
-  projectName: string;
-  access: 'NONE' | 'READ' | 'WRITE';
-}
-
-export interface UserDetail extends User {
-  projectAccess: ProjectAccess[];
-}

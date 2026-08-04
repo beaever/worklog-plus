@@ -10,8 +10,6 @@ import {
   FolderOpen,
   FileText,
   Settings,
-  Users,
-  Activity,
   LogOut,
 } from 'lucide-react';
 import { useUserStore } from '@worklog-plus/store';
@@ -22,11 +20,6 @@ const navigation = [
   { name: '프로젝트', href: '/projects', icon: FolderOpen },
   { name: '업무일지', href: '/worklogs', icon: FileText },
   { name: '설정', href: '/settings', icon: Settings },
-];
-
-const adminNavigation = [
-  { name: '사용자 관리', href: '/admin/users', icon: Users },
-  { name: '활동 로그', href: '/admin/audit-logs', icon: Activity },
 ];
 
 interface MobileSidebarProps {
@@ -106,34 +99,6 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
               </Link>
             );
           })}
-
-          {(user?.role === 'ADMIN' || user?.role === 'SYSTEM_ADMIN') && (
-            <>
-              <div className='my-2 border-t pt-2'>
-                <p className='mb-2 px-3 text-xs font-semibold uppercase text-muted-foreground'>
-                  관리
-                </p>
-              </div>
-              {adminNavigation.map((item) => {
-                const isActive = pathname.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-                    )}
-                  >
-                    <item.icon className='h-5 w-5' />
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </>
-          )}
         </nav>
 
         {user && (

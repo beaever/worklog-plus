@@ -8,7 +8,6 @@ const PROTECTED_ROUTES = [
   '/projects',
   '/worklogs',
   '/settings',
-  '/admin',
 ];
 
 // 인증 없이 접근 가능한 경로 (로그인 사용자는 대시보드로 리다이렉트)
