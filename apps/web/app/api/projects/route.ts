@@ -4,10 +4,9 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { mapProject } from '@/lib/supabase/mappers';
 import type { CreateProjectInput } from '@worklog-plus/types';
 
-const MANAGER_ROLES = ['MANAGER', 'ADMIN', 'SYSTEM_ADMIN'];
-
 // 프로젝트 생성: 프로젝트 + 소유자(WRITE 멤버) + 활동로그를 함께 생성하는 트랜잭션.
-// service role로 원자적 처리하고, 권한(MANAGER+)은 핸들러에서 검증한다.
+// service role로 원자적 처리한다. 생성은 인증된 모든 사용자에게 열려 있고(RLS projects_insert와 동일),
+// 소유자는 항상 요청자 본인으로 강제한다.
 export async function POST(request: Request) {
   const supabase = await createClient();
   const {
@@ -15,19 +14,6 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: '인증이 필요합니다' }, { status: 401 });
-  }
-
-  // 역할 검증 (MANAGER 이상)
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-  if (!profile || !MANAGER_ROLES.includes(profile.role)) {
-    return NextResponse.json(
-      { error: '프로젝트를 생성할 권한이 없습니다' },
-      { status: 403 },
-    );
   }
 
   const input = (await request.json().catch(() => null)) as CreateProjectInput | null;
