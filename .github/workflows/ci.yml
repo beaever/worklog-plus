@@ -1,10 +1,10 @@
 name: CI/CD
 
+# 상용화 준비 시점에 자동 트리거를 되살린다. 그때까지는 수동 실행만.
+#   push:         { branches: [dev, main] }
+#   pull_request: { branches: [dev, main] }
 on:
-  push:
-    branches: [dev, main]
-  pull_request:
-    branches: [dev, main]
+  workflow_dispatch:
 
 jobs:
   lint-and-typecheck:
